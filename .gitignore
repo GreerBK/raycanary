@@ -2,3 +2,5 @@
 /book
 .DS_Store
 /tools/build-wpa-supplicant
+# Claude Code agent local settings — should never be committed
+/.claude/
