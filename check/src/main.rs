@@ -2,7 +2,7 @@ use clap::Parser;
 use futures::TryStreamExt;
 use log::{debug, error, info, warn};
 use pcap_file_tokio::pcapng::{Block, PcapNgReader};
-use rayhunter::{
+use raycanary::{
     analysis::analyzer::{AnalysisRow, AnalyzerConfig, EventType, Harness},
     diag::DataType,
     gsmtap_parser,
@@ -177,7 +177,7 @@ async fn main() {
     } else {
         log::LevelFilter::Info
     };
-    rayhunter::init_logging(level);
+    raycanary::init_logging(level);
 
     let harness = Harness::new_with_config(&AnalyzerConfig::default());
     info!("Analyzers:");

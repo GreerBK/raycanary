@@ -101,7 +101,7 @@ async fn daemon_serves_index_and_api() {
     )
     .unwrap();
 
-    let daemon_bin = env!("CARGO_BIN_EXE_rayhunter-daemon");
+    let daemon_bin = env!("CARGO_BIN_EXE_raycanary-daemon");
     let mut child = Command::new(daemon_bin)
         .arg(&config_path)
         .stdout(Stdio::null())
@@ -137,7 +137,7 @@ async fn daemon_serves_index_and_api() {
 
     // reqwest's rustls backend gets pulled in via feature unification with the
     // daemon's production deps. The test process needs its own crypto provider.
-    rayhunter_daemon::crypto_provider::install_default();
+    raycanary_daemon::crypto_provider::install_default();
 
     let client = reqwest::Client::builder()
         .timeout(REQUEST_TIMEOUT)
@@ -158,8 +158,8 @@ async fn daemon_serves_index_and_api() {
     );
     let body = resp.text().await.expect("could not read index.html body");
     assert!(
-        body.contains("Rayhunter"),
-        "decompressed index.html body did not contain 'Rayhunter' marker (len={})",
+        body.contains("RayCanary"),
+        "decompressed index.html body did not contain 'RayCanary' marker (len={})",
         body.len(),
     );
 

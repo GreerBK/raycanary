@@ -1,8 +1,8 @@
 # PinePhone and PinePhone Pro
 
-The PinePhone and PinePhone Pro both use a Qualcomm mdm9607 modem as part of their [Quectel EG25-G LTE module](https://www.quectel.com/product/lte-eg25-g/). The EG25-G has global LTE band support and contains a GNSS positioning module. Rayhunter does not currently make direct use of GNSS.
+The PinePhone and PinePhone Pro both use a Qualcomm mdm9607 modem as part of their [Quectel EG25-G LTE module](https://www.quectel.com/product/lte-eg25-g/). The EG25-G has global LTE band support and contains a GNSS positioning module. RayCanary does not currently make direct use of GNSS.
 
-The modem is fully capable of running Rayhunter, but lacks both a screen and a network connection. The modem exposes an AT interface that can enable adb.
+The modem is fully capable of running RayCanary, but lacks both a screen and a network connection. The modem exposes an AT interface that can enable adb.
 
 ## Hardware
 - <https://pine64.org/devices/pinephone/>
@@ -35,14 +35,14 @@ The modem is fully capable of running Rayhunter, but lacks both a screen and a n
 Note that the Quectel EG25-G does not support LTE band 48 (CBRS 3500MHz), used in the US for unlicensed 4G/5G connectivity.
 
 ## Installing
-Download and extract the installer *on a shell on the PinePhone itself*. Unlike other Rayhunter installers, this has to be run on the device itself. Then run:
+Download and extract the installer *on a shell on the PinePhone itself*. Unlike other RayCanary installers, this has to be run on the device itself. Then run:
 
 ```sh
 ./installer pinephone
 ```
 
-## Accessing Rayhunter
-Because the modem does not have its own display or network interface, Rayhunter is only accessible on the pinephone by forwarding tcp over adb.
+## Accessing RayCanary
+Because the modem does not have its own display or network interface, RayCanary is only accessible on the pinephone by forwarding tcp over adb.
 
 ```sh
 adb forward tcp:8080 tcp:8080
@@ -57,7 +57,7 @@ adb shell
 ```
 
 ## Power saving (disable adb)
-The modem won't be able to sleep (power save) with adb enabled, even if Rayhunter is stopped. Disable adb with the following command:
+The modem won't be able to sleep (power save) with adb enabled, even if RayCanary is stopped. Disable adb with the following command:
 
 ```sh
 ./installer util pinephone-stop-adb

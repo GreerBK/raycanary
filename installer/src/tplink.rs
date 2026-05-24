@@ -131,7 +131,7 @@ async fn tplink_run_install(
     let data_dir = if let Some(dir) = cli_data_dir {
         dir
     } else if skip_sdcard {
-        "/cache/rayhunter-data".to_owned()
+        "/cache/raycanary-data".to_owned()
     } else {
         if sdcard_path.is_empty() {
             let try_paths = [
@@ -175,7 +175,7 @@ async fn tplink_run_install(
         .is_err()
         {
             // Try to mount the SD card, and if that fails we assume the user didn't insert one.
-            telnet_send_command(addr, &format!("mount /dev/mmcblk0p1 {sdcard_path}"), "exit code 0", true).await.context("Rayhunter needs a FAT-formatted SD card to function for more than a few hours. Insert one and rerun this installer, or pass --skip-sdcard")?;
+            telnet_send_command(addr, &format!("mount /dev/mmcblk0p1 {sdcard_path}"), "exit code 0", true).await.context("RayCanary needs a FAT-formatted SD card to function for more than a few hours. Insert one and rerun this installer, or pass --skip-sdcard")?;
         } else {
             println!("sdcard already mounted");
         }
@@ -188,21 +188,21 @@ async fn tplink_run_install(
 
     install_config(&mut conn, "tplink", reset_config).await?;
 
-    let rayhunter_daemon_bin = crate::get_file!("FILE_RAYHUNTER_DAEMON");
+    let raycanary_daemon_bin = crate::get_file!("FILE_RAYCANARY_DAEMON");
 
     telnet_send_file(
         addr,
-        "/data/rayhunter/rayhunter-daemon",
-        rayhunter_daemon_bin,
+        "/data/raycanary/raycanary-daemon",
+        raycanary_daemon_bin,
         true,
     )
     .await?;
 
-    let init_script = get_rayhunter_daemon(if skip_sdcard { None } else { Some(&data_dir) });
+    let init_script = get_raycanary_daemon(if skip_sdcard { None } else { Some(&data_dir) });
 
     telnet_send_file(
         addr,
-        "/etc/init.d/rayhunter_daemon",
+        "/etc/init.d/raycanary_daemon",
         init_script.as_bytes(),
         true,
     )
@@ -210,26 +210,26 @@ async fn tplink_run_install(
 
     telnet_send_command(
         addr,
-        "chmod ugo+x /data/rayhunter/rayhunter-daemon",
+        "chmod ugo+x /data/raycanary/raycanary-daemon",
         "exit code 0",
         true,
     )
     .await?;
     telnet_send_command(
         addr,
-        "chmod 755 /etc/init.d/rayhunter_daemon",
+        "chmod 755 /etc/init.d/raycanary_daemon",
         "exit code 0",
         true,
     )
     .await?;
 
-    // if the device is not v3, the JS-based root exploit already added rayhunter_daemon as a
+    // if the device is not v3, the JS-based root exploit already added raycanary_daemon as a
     // startup script. tplink v9 does not have update-rc.d, and it was reported that *sometimes* it
     // is unreliable on other hardware revisions too.
     if is_v3 {
         telnet_send_command(
             addr,
-            "update-rc.d rayhunter_daemon defaults",
+            "update-rc.d raycanary_daemon defaults",
             "exit code 0",
             true,
         )
@@ -290,14 +290,14 @@ async fn handler(state: State<AppState>, mut req: Request) -> Result<Response, S
         let mut data = BytesMut::from(data);
         // inject some javascript into the admin UI to get us a telnet shell.
         data.extend(br#";document.addEventListener("DOMContentLoaded", () => {
-        console.log("rayhunter: start polling");
+        console.log("raycanary: start polling");
 
-        var rayhunterSleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        var raycanarySleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        var rayhunterPoll = window.setInterval(async () => {
-            Globals.models.PTModel.add({applicationName: "rayhunter-daemon", enableState: 1, entryId: 1, openPort: "2401", openProtocol: "TCP", triggerPort: "$(/etc/init.d/rayhunter_daemon start &)", triggerProtocol: "TCP"});
-            console.log("rayhunter: first request succeeded, stopping rayhunter poll loop");
-            window.clearInterval(rayhunterPoll);
+        var raycanaryPoll = window.setInterval(async () => {
+            Globals.models.PTModel.add({applicationName: "raycanary-daemon", enableState: 1, entryId: 1, openPort: "2401", openProtocol: "TCP", triggerPort: "$(/etc/init.d/raycanary_daemon start &)", triggerProtocol: "TCP"});
+            console.log("raycanary: first request succeeded, stopping raycanary poll loop");
+            window.clearInterval(raycanaryPoll);
 
             // PTModel.add actually does not wait for the request to finsh.
             // Wait 1 second for the request to finish.
@@ -305,15 +305,15 @@ async fn handler(state: State<AppState>, mut req: Request) -> Result<Response, S
             // sending a request with entryId: 2 is invalid if entryId 1 does not exist (yet)
             // This only happens starting with firmware M7350(EU)_V9_9.0.2 Build 241021, earlier
             // versions are not affected.
-            await rayhunterSleep(1000);
+            await raycanarySleep(1000);
 
-            console.log("rayhunter: running second request");
-            Globals.models.PTModel.add({applicationName: "rayhunter-root", enableState: 1, entryId: 2, openPort: "2402", openProtocol: "TCP", triggerPort: "$(busybox telnetd -l /bin/sh &)", triggerProtocol: "TCP"});
+            console.log("raycanary: running second request");
+            Globals.models.PTModel.add({applicationName: "raycanary-root", enableState: 1, entryId: 2, openPort: "2402", openProtocol: "TCP", triggerPort: "$(busybox telnetd -l /bin/sh &)", triggerProtocol: "TCP"});
 
             // Do not use alert(), instead replace page with success message. Using alert() will
             // block the event loop in such a way that any background promises are blocked from
             // progress too. For example: The HTTP requests to register our port triggers!
-            document.body.innerHTML = "<h1>Success! You can go back to the rayhunter installer.</h1>";
+            document.body.innerHTML = "<h1>Success! You can go back to the raycanary installer.</h1>";
         }, 1000);
         });"#);
         response = Response::from_parts(parts, Body::from(Bytes::from(data)));
@@ -370,7 +370,7 @@ async fn tplink_launch_telnet_v5(admin_ip: &str) -> Result<(), Error> {
     Ok(())
 }
 
-fn get_rayhunter_daemon(sdcard_path: Option<&str>) -> String {
+fn get_raycanary_daemon(sdcard_path: Option<&str>) -> String {
     // Even though TP-Link eventually auto-mounts the SD card, it sometimes does so too late. And
     // changing the order in which daemons are started up seems to not work reliably.
     //
@@ -378,11 +378,11 @@ fn get_rayhunter_daemon(sdcard_path: Option<&str>) -> String {
     // specific to a particular hardware revision here.
     let prestart = match sdcard_path {
         Some(path) => {
-            format!("(mount /dev/mmcblk0p1 {path} || true) 2>&1 | tee /tmp/rayhunter-mount.log")
+            format!("(mount /dev/mmcblk0p1 {path} || true) 2>&1 | tee /tmp/raycanary-mount.log")
         }
         None => String::new(),
     };
-    crate::RAYHUNTER_DAEMON_INIT.replace("#RAYHUNTER-PRESTART", &prestart)
+    crate::RAYCANARY_DAEMON_INIT.replace("#RAYCANARY-PRESTART", &prestart)
 }
 
 /// Root the TP-Link device and open an interactive shell
@@ -392,11 +392,11 @@ pub async fn shell(admin_ip: &str) -> Result<(), Error> {
 }
 
 #[test]
-fn test_get_rayhunter_daemon() {
-    let s = get_rayhunter_daemon(Some("/media/card"));
+fn test_get_raycanary_daemon() {
+    let s = get_raycanary_daemon(Some("/media/card"));
     assert!(s.contains("mount /dev/mmcblk0p1 /media/card"));
 
-    let s = get_rayhunter_daemon(None);
+    let s = get_raycanary_daemon(None);
     assert!(!s.contains("mmcblk0p1"));
-    assert!(!s.contains("#RAYHUNTER-PRESTART"));
+    assert!(!s.contains("#RAYCANARY-PRESTART"));
 }

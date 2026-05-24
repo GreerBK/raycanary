@@ -2,7 +2,7 @@ use std::ffi::CString;
 use std::sync::Arc;
 
 use crate::battery::get_battery_status;
-use crate::error::RayhunterError;
+use crate::error::RaycanaryError;
 use crate::server::ServerState;
 use crate::{battery::BatteryState, qmdl_store::ManifestEntry};
 
@@ -10,7 +10,7 @@ use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;
 use log::error;
-use rayhunter::{Device, util::RuntimeMetadata};
+use raycanary::{Device, util::RuntimeMetadata};
 use serde::Serialize;
 use tokio::process::Command;
 
@@ -33,7 +33,7 @@ impl SystemStats {
             runtime_metadata: RuntimeMetadata::new(),
             battery_status: match get_battery_status(device).await {
                 Ok(status) => Some(status),
-                Err(RayhunterError::FunctionNotSupportedForDeviceError) => None,
+                Err(RaycanaryError::FunctionNotSupportedForDeviceError) => None,
                 Err(err) => {
                     log::error!("Failed to get battery status: {err}");
                     None
@@ -226,13 +226,13 @@ pub async fn get_qmdl_manifest(
     tag = "Statistics",
     responses(
         (status = StatusCode::OK, description = "Success", content_type = "text/plain"),
-        (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Could not read /data/rayhunter/rayhunter.log file")
+        (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Could not read /data/raycanary/raycanary.log file")
     ),
     summary = "Display log",
     description = "Download the current device log in UTF-8 plaintext."
 ))]
 pub async fn get_log() -> Result<String, (StatusCode, String)> {
-    tokio::fs::read_to_string("/data/rayhunter/rayhunter.log")
+    tokio::fs::read_to_string("/data/raycanary/raycanary.log")
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))
 }

@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use crate::config::GpsMode;
 use chrono::{DateTime, Local, TimeDelta};
 use log::{info, warn};
-use rayhunter::util::RuntimeMetadata;
+use raycanary::util::RuntimeMetadata;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tokio::{
@@ -68,8 +68,8 @@ pub struct ManifestEntry {
     pub last_message_time: Option<DateTime<Local>>,
     /// The size of the QMDL file in bytes
     pub qmdl_size_bytes: usize,
-    /// The rayhunter daemon version which generated the file
-    pub rayhunter_version: Option<String>,
+    /// The raycanary daemon version which generated the file
+    pub raycanary_version: Option<String>,
     /// The OS which created the file
     pub system_os: Option<String>,
     /// The architecture on which the OS was running
@@ -85,14 +85,14 @@ pub struct ManifestEntry {
 
 impl ManifestEntry {
     fn new(gps_mode: GpsMode) -> Self {
-        let now = rayhunter::clock::get_adjusted_now();
+        let now = raycanary::clock::get_adjusted_now();
         let metadata = RuntimeMetadata::new();
         ManifestEntry {
             name: format!("{}", now.timestamp()),
             start_time: now,
             last_message_time: None,
             qmdl_size_bytes: 0,
-            rayhunter_version: Some(metadata.rayhunter_version),
+            raycanary_version: Some(metadata.raycanary_version),
             system_os: Some(metadata.system_os),
             arch: Some(metadata.arch),
             stop_reason: None,
@@ -228,7 +228,7 @@ impl RecordingStore {
                 start_time: start_time.into(),
                 last_message_time: Some(last_message_time.into()),
                 qmdl_size_bytes: metadata.size() as usize,
-                rayhunter_version: None,
+                raycanary_version: None,
                 system_os: None,
                 arch: None,
                 stop_reason: None,
@@ -374,7 +374,7 @@ impl RecordingStore {
     ) -> Result<(), RecordingStoreError> {
         self.manifest.entries[entry_index].qmdl_size_bytes = size_bytes;
         self.manifest.entries[entry_index].last_message_time =
-            Some(rayhunter::clock::get_adjusted_now());
+            Some(raycanary::clock::get_adjusted_now());
         self.write_manifest().await
     }
 
@@ -401,7 +401,7 @@ impl RecordingStore {
     }
 
     pub fn get_next_unuploaded_entry(&self, min_age: TimeDelta) -> Option<String> {
-        let now = rayhunter::clock::get_adjusted_now();
+        let now = raycanary::clock::get_adjusted_now();
         self.manifest
             .entries
             .iter()

@@ -77,7 +77,7 @@
     <div>
         <p class="text-lg underline">Unparsed Messages</p>
         <p>
-            These are due to a limitation or bug in Rayhunter's parser, and aren't usually a
+            These are due to a limitation or bug in RayCanary's parser, and aren't usually a
             problem. We'll not accept bug reports about them unless something else is going wrong
             (such as false-positives or definite false-negatives)
         </p>

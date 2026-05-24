@@ -2,7 +2,7 @@ import { get_report, type AnalysisReport } from './analysis.svelte';
 import { req } from './utils.svelte';
 
 export enum AnalysisStatus {
-    // rayhunter is currently analyzing this entry (note that this is distinct
+    // raycanary is currently analyzing this entry (note that this is distinct
     // from the currently-recording entry)
     Running,
     // this entry is queued to be analyzed

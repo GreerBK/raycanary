@@ -1,9 +1,9 @@
 [book]
-authors = ["The Rayhunter Team"]
+authors = ["The RayCanary Team"]
 language = "en"
 src = "doc"
-title = "Rayhunter - An IMSI Catcher Catcher"
+title = "RayCanary - An IMSI Catcher Catcher"
 
 [output.html]
-edit-url-template = "https://github.com/efforg/rayhunter/edit/main/{path}"
+edit-url-template = "https://github.com/GreerBK/raycanary/edit/main/{path}"
 additional-css = ["doc/custom.css"]

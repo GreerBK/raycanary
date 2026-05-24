@@ -63,9 +63,19 @@ export interface Config {
     firewall_restrict_outbound: boolean;
     firewall_allowed_ports: number[] | null;
     webdav: WebdavConfig;
+    speaker: SpeakerConfig;
     gps_mode: GpsMode;
     gps_fixed_latitude: number | null;
     gps_fixed_longitude: number | null;
+}
+
+export type SpeakerMinSeverity = 'Low' | 'Medium' | 'High';
+
+export interface SpeakerConfig {
+    enabled: boolean;
+    command: string;
+    min_severity: SpeakerMinSeverity;
+    debounce_secs: number;
 }
 
 export interface WifiStatus {
@@ -155,6 +165,17 @@ export async function set_config(config: Config): Promise<void> {
 
 export async function test_notification(): Promise<void> {
     const response = await fetch('/api/test-notification', {
+        method: 'POST',
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+    }
+}
+
+export async function test_speaker(): Promise<void> {
+    const response = await fetch('/api/test-speaker', {
         method: 'POST',
     });
 

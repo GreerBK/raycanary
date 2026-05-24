@@ -8,7 +8,7 @@ Cheap used versions of the device can be found easily on Ebay, and also from the
 - <https://www.walmart.com/ip/T-Mobile-TMOHS1-Portable-Internet-4G-LTE-WIFI-Hotspot/3453542421>
 - <https://www.metrobyt-mobile.com/hotspot-iot-connected-devices/t-mobile-hotspot>
 
-Rayhunter has been tested on:
+RayCanary has been tested on:
 
 ```sh
 WT_INNER_VERSION=SW_Q89527AA1_V045_M11_TMO_USR_MP
@@ -38,7 +38,7 @@ According to FCC ID 2APXW-TMOHS1 Test Report No. I20Z61602-WMD02 ([part 1](https
 
 ## WiFi client mode
 
-The TMOHS1 supports WiFi client mode, allowing Rayhunter to connect to an existing WiFi network while keeping the hotspot running. See [WiFi Client Mode](./configuration.md#wifi-client-mode) for setup.
+The TMOHS1 supports WiFi client mode, allowing RayCanary to connect to an existing WiFi network while keeping the hotspot running. See [WiFi Client Mode](./configuration.md#wifi-client-mode) for setup.
 
 ## Installing
 Connect to the TMOHS1's network over WiFi or USB tethering.
@@ -53,7 +53,7 @@ Then run the installer:
 ```
 
 ## LED modes
-| Rayhunter state  | LED indicator                  |
+| RayCanary state  | LED indicator                  |
 | ---------------- | ------------------------------ |
 | Recording        | Signal LED slowly blinks blue. |
 | Paused           | WiFi LED blinks white.         |
@@ -61,7 +61,7 @@ Then run the installer:
 
 ## Wi-Fi auto-shutdown
 
-By default the TMOHS1 turns off its Wi-Fi access point after 10 minutes with no connected clients. Rayhunter keeps recording on the device in the background, but once the access point is down you can't reach the web UI, download captures, or see new warnings until you power cycle the hotspot.
+By default the TMOHS1 turns off its Wi-Fi access point after 10 minutes with no connected clients. RayCanary keeps recording on the device in the background, but once the access point is down you can't reach the web UI, download captures, or see new warnings until you power cycle the hotspot.
 
 The TMOHS1's native admin UI lets you change this:
 
@@ -72,10 +72,10 @@ The TMOHS1's native admin UI lets you change this:
 
 ![TMOHS1 Wi-Fi Standby setting](./tmohs1-wifi-standby.png)
 
-Keeping Wi-Fi always on uses more battery. If you only monitor Rayhunter through the device's LEDs and don't need remote access, the default 10-minute timer is fine.
+Keeping Wi-Fi always on uses more battery. If you only monitor RayCanary through the device's LEDs and don't need remote access, the default 10-minute timer is fine.
 
 ## Obtaining a shell
-Even when rayhunter is running, for security reasons the TMOHS1 will not have telnet or adb enabled during normal operation.
+Even when raycanary is running, for security reasons the TMOHS1 will not have telnet or adb enabled during normal operation.
 
 Use either command below to enable telnet or adb access:
 

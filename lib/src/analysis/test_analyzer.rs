@@ -15,7 +15,7 @@ impl Analyzer for TestAnalyzer {
 
     fn get_description(&self) -> Cow<'_, str> {
         Cow::from(
-            "This is an analyzer which can be used to test that your rayhunter is working. It will generate an alert for every SIB1 message (a beacon from the cell tower) that it sees. Do not leave this on when you are hunting or it will be very noisy.",
+            "This is an analyzer which can be used to test that your raycanary is working. It will generate an alert for every SIB1 message (a beacon from the cell tower) that it sees. Do not leave this on when you are hunting or it will be very noisy.",
         )
     }
 

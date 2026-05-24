@@ -230,7 +230,7 @@ pub fn run_webdav_upload_worker(
                                 Err(err) => warn!("Unable to delete entry: {} after upload to WebDAV: {}", unuploaded_entry, err),
                             }
                         } else {
-                            match qmdl_store_lock.write().await.mark_entry_as_uploaded(&unuploaded_entry, rayhunter::clock::get_adjusted_now()).await {
+                            match qmdl_store_lock.write().await.mark_entry_as_uploaded(&unuploaded_entry, raycanary::clock::get_adjusted_now()).await {
                                 Ok(_) => info!("Successfully marked entry: {} as uploaded", unuploaded_entry),
                                 Err(err) => warn!("Unable to mark entry: {} as uploaded: {}", unuploaded_entry, err),
                             }

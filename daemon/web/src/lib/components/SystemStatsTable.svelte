@@ -26,7 +26,7 @@
     });
     let title_text = $derived.by(() => {
         if (stats.battery_status === undefined) {
-            return 'Rayhunter does not yet support displaying the battery level for this device.';
+            return 'RayCanary does not yet support displaying the battery level for this device.';
         }
 
         let text = `Battery is ${stats.battery_status.level}% full`;
@@ -45,8 +45,8 @@
     <table class="text-sm w-full">
         <tbody>
             <tr class="border-b border-gray-200">
-                <td class="py-1 pr-4 text-gray-500 font-medium">Rayhunter Version</td>
-                <td class="py-1">{stats.runtime_metadata.rayhunter_version}</td>
+                <td class="py-1 pr-4 text-gray-500 font-medium">RayCanary Version</td>
+                <td class="py-1">{stats.runtime_metadata.raycanary_version}</td>
             </tr>
             <tr class="border-b border-gray-200">
                 <td class="py-1 pr-4 text-gray-500 font-medium">Storage</td>

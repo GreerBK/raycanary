@@ -1,6 +1,6 @@
 # Orbic/Kajeet RC400L
 
-The Orbic RC400L is an inexpensive LTE modem primarily designed for the US market, and the original device for which Rayhunter is developed.
+The Orbic RC400L is an inexpensive LTE modem primarily designed for the US market, and the original device for which RayCanary is developed.
 
 It is also sometimes sold under the brand Kajeet RC400L. This is the exact same hardware and can be treated the same. 
 
@@ -66,7 +66,7 @@ To get started, follow the [release installation guide](./installing-from-releas
 * On Verizon Orbic, the default password is the WiFi password.
 * On Kajeet/Smartspot devices, the default password is `$m@rt$p0tc0nf!g`
 
-The Rayhunter UI will be available at <http://192.168.1.1:8080>.
+The RayCanary UI will be available at <http://192.168.1.1:8080>.
 
 <a name=shell></a>
 ## Obtaining a shell

@@ -1,11 +1,11 @@
 [package]
-name = "rayhunter-daemon"
+name = "raycanary-daemon"
 version = "0.11.1"
 edition = "2024"
 rust-version = "1.88.0"
 
 [lib]
-name = "rayhunter_daemon"
+name = "raycanary_daemon"
 path = "src/lib.rs"
 
 [[bin]]
@@ -20,7 +20,7 @@ pq-tls = ["reqwest/rustls-tls-webpki-roots-no-provider", "dep:rustls-post-quantu
 apidocs = ["dep:utoipa", "wifi-station/utoipa"]
 
 [dependencies]
-rayhunter = { path = "../lib" }
+raycanary = { path = "../lib" }
 wifi-station = "0.10.1"
 toml = "0.8.8"
 serde = { version = "1.0.193", features = ["derive"] }

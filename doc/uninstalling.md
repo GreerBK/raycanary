@@ -11,26 +11,26 @@ Inside, run:
 
 ```shell
 echo 3 > /usrdata/mode.cfg  # only relevant if you previously installed via ADB installer
-rm -rf /data/rayhunter /etc/init.d/rayhunter_daemon /bin/rootshell
+rm -rf /data/raycanary /etc/init.d/raycanary_daemon /bin/rootshell
 reboot
 ```
 
-Your device is now Rayhunter-free, and should no longer be rooted.
+Your device is now RayCanary-free, and should no longer be rooted.
 
 ## TPLink
 
 1. Run `./installer util tplink-shell` to obtain rootshell on the device.
-3. `rm /data/rayhunter /etc/init.d/rayhunter_daemon`
-4. `update-rc.d rayhunter_daemon remove`
+3. `rm /data/raycanary /etc/init.d/raycanary_daemon`
+4. `update-rc.d raycanary_daemon remove`
 5. (hardware revision v4.0+ only) In `Settings > NAT Settings > Port Triggers` in TP-Link's admin UI, remove any leftover port triggers.
 
 ## UZ801
 
 0. (Optional): Back up the qmdl folder with all of the captures:
-`adb pull /data/rayhunter/qmdl .`
+`adb pull /data/raycanary/qmdl .`
 1. Run `adb shell` to get a root shell on the device
-2. Delete the /data/rayhunter folder: `rm -rf /data/rayhunter`
-3. Modify the initmifiservice.sh script to remove the rayhunter 
+2. Delete the /data/raycanary folder: `rm -rf /data/raycanary`
+3. Modify the initmifiservice.sh script to remove the raycanary 
 startup line:
 ```sh
 mount -o remount,rw /system

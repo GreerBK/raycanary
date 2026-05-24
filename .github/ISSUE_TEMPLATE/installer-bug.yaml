@@ -6,11 +6,11 @@ body:
     attributes:
       label: Prerequisites
       options:
-        - label: I have read [CONTRIBUTING.md](https://github.com/EFForg/rayhunter/blob/main/CONTRIBUTING.md)
+        - label: I have read [CONTRIBUTING.md](https://github.com/GreerBK/raycanary/blob/main/CONTRIBUTING.md)
           required: true
   - type: input
     attributes:
-      label: Rayhunter Version
+      label: RayCanary Version
       placeholder: 'v0.5.0'
     validations:
       required: true
@@ -18,7 +18,7 @@ body:
     attributes:
       label: Device
       description: |
-        What device are you trying to install Rayhunter on?
+        What device are you trying to install RayCanary on?
       options:
         - Orbic RC400L
         - Tplink M7350
@@ -44,7 +44,7 @@ body:
     attributes:
       label: Describe the Issue
       description: |
-        Please describe the issue you're having installing Rayhunter.
+        Please describe the issue you're having installing RayCanary.
         Include the logs outputed by the installer program. If the installer
         is crashing, please try running the installer with `RUST_BACKTRACE=1`
         environment variable set so we can see exactly where the installer is

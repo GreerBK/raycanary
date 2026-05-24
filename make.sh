@@ -4,8 +4,8 @@ pushd daemon/web
     npm run build
 popd
 cargo build-daemon-firmware-devel
-adb shell '/bin/rootshell -c "/etc/init.d/rayhunter_daemon stop"'
-adb push target/armv7-unknown-linux-musleabihf/firmware-devel/rayhunter-daemon \
-    /data/rayhunter/rayhunter-daemon
+adb shell '/bin/rootshell -c "/etc/init.d/raycanary_daemon stop"'
+adb push target/armv7-unknown-linux-musleabihf/firmware-devel/raycanary-daemon \
+    /data/raycanary/raycanary-daemon
 echo "rebooting the device..."
 adb shell '/bin/rootshell -c "reboot"'

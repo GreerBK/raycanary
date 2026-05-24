@@ -2,10 +2,10 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
-use rayhunter::Device;
-use rayhunter::analysis::analyzer::AnalyzerConfig;
+use raycanary::Device;
+use raycanary::analysis::analyzer::AnalyzerConfig;
 
-use crate::error::RayhunterError;
+use crate::error::RaycanaryError;
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Serialize_repr, Deserialize_repr)]
@@ -37,7 +37,7 @@ pub enum KeyInputMode {
 }
 use crate::notifications::NotificationType;
 
-/// The structure of a valid rayhunter configuration
+/// The structure of a valid raycanary configuration
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(default)]
 #[cfg_attr(feature = "apidocs", derive(utoipa::ToSchema))]
@@ -84,6 +84,46 @@ pub struct Config {
     pub dns_servers: Option<Vec<String>>,
     /// WebDAV upload configuration. The upload worker runs whenever `webdav.url` is non-empty.
     pub webdav: WebdavConfig,
+    /// Audible-alert speaker configuration. The speaker worker runs whenever `speaker.enabled` is
+    /// true and `speaker.command` is non-empty.
+    pub speaker: SpeakerConfig,
+}
+
+/// Configuration for the audible-alert speaker.
+///
+/// RayCanary does not drive audio hardware directly. Instead, on each detection it runs the shell
+/// command in `command` — typically something like `aplay /data/raycanary/alert.wav` for a USB audio
+/// DAC, or a sysfs-PWM write for a GPIO-attached piezo. This keeps the daemon agnostic to whatever
+/// physical speaker hardware you wire into the device.
+///
+/// Security: `command` is executed via `sh -c` as the daemon's user (root on the supported
+/// hotspots) and is settable via the unauthenticated `POST /api/config` endpoint. See
+/// `doc/speaker.md` for the threat model.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(default)]
+#[cfg_attr(feature = "apidocs", derive(utoipa::ToSchema))]
+pub struct SpeakerConfig {
+    /// Master enable for the speaker. When false the speaker worker drops all events.
+    pub enabled: bool,
+    /// Shell command executed (via `sh -c`) when an alert at or above `min_severity` fires.
+    /// Leave empty to disable.
+    pub command: String,
+    /// Minimum heuristic severity that triggers a sound.
+    pub min_severity: crate::speaker::SpeakerMinSeverity,
+    /// Minimum seconds between two consecutive speaker plays. Stops a noisy site from
+    /// re-triggering the speaker continuously.
+    pub debounce_secs: u64,
+}
+
+impl Default for SpeakerConfig {
+    fn default() -> Self {
+        SpeakerConfig {
+            enabled: false,
+            command: String::new(),
+            min_severity: crate::speaker::SpeakerMinSeverity::Low,
+            debounce_secs: 30,
+        }
+    }
 }
 
 /// Configuration for uploading finished QMDL recordings to a WebDAV server.
@@ -124,7 +164,7 @@ impl Default for WebdavConfig {
 impl Default for Config {
     fn default() -> Self {
         Config {
-            qmdl_store_path: "/data/rayhunter/qmdl".to_string(),
+            qmdl_store_path: "/data/raycanary/qmdl".to_string(),
             port: 8080,
             debug_mode: false,
             device: Device::Orbic,
@@ -145,6 +185,7 @@ impl Default for Config {
             wifi_enabled: false,
             dns_servers: None,
             webdav: WebdavConfig::default(),
+            speaker: SpeakerConfig::default(),
         }
     }
 }
@@ -173,38 +214,38 @@ impl Config {
             wpa_supplicant_bin: wpa_bin.or_else(|| resolve_bin("wpa_supplicant")),
             hostapd_conf,
             ctrl_interface,
-            udhcpc_hook_path: Some("/data/rayhunter/udhcpc-hook.sh".into()),
-            dhcp_lease_path: Some("/data/rayhunter/dhcp_lease".into()),
-            wpa_conf_path: Some("/data/rayhunter/wpa_sta.conf".into()),
+            udhcpc_hook_path: Some("/data/raycanary/udhcpc-hook.sh".into()),
+            dhcp_lease_path: Some("/data/raycanary/dhcp_lease".into()),
+            wpa_conf_path: Some("/data/raycanary/wpa_sta.conf".into()),
             iw_bin: resolve_bin("iw"),
             udhcpc_bin: resolve_bin("udhcpc"),
-            crash_log_dir: Some("/data/rayhunter/crash-logs".into()),
-            wakelock_name: Some("rayhunter".into()),
+            crash_log_dir: Some("/data/raycanary/crash-logs".into()),
+            wakelock_name: Some("raycanary".into()),
         }
     }
 }
 
 fn resolve_bin(name: &str) -> Option<String> {
-    let local = format!("/data/rayhunter/bin/{name}");
+    let local = format!("/data/raycanary/bin/{name}");
     if std::path::Path::new(&local).exists() {
         return Some(local);
     }
     None
 }
 
-pub async fn parse_config<P>(path: P) -> Result<Config, RayhunterError>
+pub async fn parse_config<P>(path: P) -> Result<Config, RaycanaryError>
 where
     P: AsRef<std::path::Path>,
 {
     let mut config = if let Ok(config_file) = tokio::fs::read_to_string(&path).await {
-        toml::from_str(&config_file).map_err(RayhunterError::ConfigFileParsingError)?
+        toml::from_str(&config_file).map_err(RaycanaryError::ConfigFileParsingError)?
     } else {
         warn!("unable to read config file, using default config");
         Config::default()
     };
 
     if let Some((ssid, security)) =
-        wifi_station::read_network_from_wpa_conf("/data/rayhunter/wpa_sta.conf")
+        wifi_station::read_network_from_wpa_conf("/data/raycanary/wpa_sta.conf")
     {
         config.wifi_ssid = Some(ssid);
         config.wifi_security = Some(security);

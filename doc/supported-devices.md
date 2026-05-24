@@ -16,7 +16,7 @@ The TP-Link M7350 also works in the Americas but is usually more expensive.
 _Derivative work of [this file](https://commons.wikimedia.org/wiki/File:International_Telecommunication_Union_regions_with_dividing_lines.svg) by [Maximillian Dörrbecker](https://de.wikipedia.org/wiki/User:Chumwa) licensed [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5)_
 
 ## 2. Functional devices
-Rayhunter is confirmed to work on these devices.
+RayCanary is confirmed to work on these devices.
 
 | Device | Recommended region |
 | ------ | ------ |
@@ -28,6 +28,6 @@ Rayhunter is confirmed to work on these devices.
 | [Moxee hotspot](./moxee.md) | Americas |
 
 ## Adding new devices
-Rayhunter was built and tested primarily on the Orbic RC400L mobile hotspot, but the community has been working hard at adding support for other devices. Theoretically, if a device runs a Qualcomm modem and exposes a `/dev/diag` interface, Rayhunter may work on it.
+RayCanary was built and tested primarily on the Orbic RC400L mobile hotspot, but the community has been working hard at adding support for other devices. Theoretically, if a device runs a Qualcomm modem and exposes a `/dev/diag` interface, RayCanary may work on it.
 
-If you have a device in mind which you'd like Rayhunter to support, please read the [porting guide](./porting.md) and [open a discussion on our Github](https://github.com/EFForg/rayhunter/discussions)!
+If you have a device in mind which you'd like RayCanary to support, please read the [porting guide](./porting.md) and [open a discussion on our Github](https://github.com/GreerBK/raycanary/discussions)!

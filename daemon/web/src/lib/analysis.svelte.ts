@@ -15,18 +15,18 @@ export type ReportStatistics = {
 
 export class ReportMetadata {
     public analyzers: AnalyzerMetadata[];
-    public rayhunter: RayhunterMetadata;
+    public raycanary: RayCanaryMetadata;
     public report_version: number;
 
     constructor(ndjson: any) {
         this.analyzers = ndjson.analyzers;
-        this.rayhunter = ndjson.rayhunter;
+        this.raycanary = ndjson.raycanary;
         this.report_version = ndjson.report_version || 2; // Default to v2
     }
 }
 
-export type RayhunterMetadata = {
-    rayhunter_version: string;
+export type RayCanaryMetadata = {
+    raycanary_version: string;
     system_os: string;
     arch: string;
 };

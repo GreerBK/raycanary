@@ -11,6 +11,7 @@ mod notifications;
 mod pcap;
 mod qmdl_store;
 mod server;
+mod speaker;
 mod stats;
 mod webdav;
 
@@ -20,15 +21,17 @@ use std::sync::Arc;
 use crate::battery::run_battery_notification_worker;
 use crate::config::{GpsMode, parse_args, parse_config};
 use crate::diag::run_diag_read_thread;
-use crate::error::RayhunterError;
+use crate::error::RaycanaryError;
 use crate::gps::{get_gps, post_gps};
 use crate::notifications::{NotificationService, run_notification_worker};
 use crate::pcap::get_pcap;
 use crate::qmdl_store::RecordingStore;
 use crate::server::{
-    ServerState, debug_set_display_state, get_config, get_qmdl, get_time, get_wifi_status, get_zip,
-    scan_wifi, serve_static, set_config, set_time_offset, test_notification,
+    ServerState, debug_set_display_state, get_battery, get_config, get_qmdl, get_time,
+    get_wifi_status, get_zip, scan_wifi, serve_static, set_config, set_time_offset,
+    test_notification, test_speaker,
 };
+use crate::speaker::{SpeakerService, run_speaker_worker};
 use crate::stats::{get_qmdl_manifest, get_system_stats};
 use crate::webdav::run_webdav_upload_worker;
 use wifi_station::WifiStatus;
@@ -45,7 +48,7 @@ use diag::{
 };
 use log::{error, info, warn};
 use qmdl_store::RecordingStoreError;
-use rayhunter::Device;
+use raycanary::Device;
 use stats::get_log;
 use tokio::net::TcpListener;
 use tokio::select;
@@ -75,6 +78,8 @@ fn get_router() -> AppRouter {
         .route("/api/config", get(get_config))
         .route("/api/config", post(set_config))
         .route("/api/test-notification", post(test_notification))
+        .route("/api/test-speaker", post(test_speaker))
+        .route("/api/battery", get(get_battery))
         .route("/api/wifi-status", get(get_wifi_status))
         .route("/api/wifi-scan", post(scan_wifi))
         .route("/api/time", get(get_time))
@@ -100,7 +105,7 @@ async fn run_server(
     let app = get_router().with_state(state);
 
     task_tracker.spawn(async move {
-        info!("The orca is hunting for stingrays...");
+        info!("The canary is listening for stingrays...");
         axum::serve(listener, app)
             .with_graceful_shutdown(shutdown_token.cancelled_owned())
             .await
@@ -111,13 +116,13 @@ async fn run_server(
 // Loads a RecordingStore if one exists, and if not, only create one if we're
 // not in debug mode. If we fail to parse the manifest AND we're not in debug
 // mode, try to recover the manifest from the existing QMDL files
-async fn init_qmdl_store(config: &config::Config) -> Result<RecordingStore, RayhunterError> {
+async fn init_qmdl_store(config: &config::Config) -> Result<RecordingStore, RaycanaryError> {
     let store_exists = RecordingStore::exists(&config.qmdl_store_path).await?;
     if config.debug_mode {
         if store_exists {
             Ok(RecordingStore::load(&config.qmdl_store_path).await?)
         } else {
-            Err(RayhunterError::NoStoreDebugMode(
+            Err(RaycanaryError::NoStoreDebugMode(
                 config.qmdl_store_path.clone(),
             ))
         }
@@ -145,7 +150,7 @@ fn run_shutdown_thread(
     shutdown_token: CancellationToken,
     qmdl_store_lock: Arc<RwLock<RecordingStore>>,
     analysis_tx: Sender<AnalysisCtrlMessage>,
-) -> JoinHandle<Result<(), RayhunterError>> {
+) -> JoinHandle<Result<(), RaycanaryError>> {
     info!("create shutdown thread");
 
     task_tracker.spawn(async move {
@@ -179,8 +184,8 @@ fn run_shutdown_thread(
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), RayhunterError> {
-    rayhunter::init_logging(log::LevelFilter::Info);
+async fn main() -> Result<(), RaycanaryError> {
+    raycanary::init_logging(log::LevelFilter::Info);
 
     crate::crypto_provider::install_default();
 
@@ -197,11 +202,11 @@ async fn main() -> Result<(), RayhunterError> {
 async fn run_with_config(
     args: &config::Args,
     config: config::Config,
-) -> Result<bool, RayhunterError> {
+) -> Result<bool, RaycanaryError> {
     // TaskTrackers give us an interface to spawn tokio threads, and then
     // eventually await all of them ending
     let task_tracker = TaskTracker::new();
-    println!("R A Y H U N T E R 🐳");
+    println!("R A Y   C A N A R Y");
 
     let store = init_qmdl_store(&config).await?;
     let analysis_status = AnalysisStatus::new(&store);
@@ -217,6 +222,8 @@ async fn run_with_config(
     let _shutdown_guard = shutdown_token.clone().drop_guard();
 
     let notification_service = NotificationService::new(config.ntfy_url.clone());
+    let speaker_service = SpeakerService::new(&config.speaker);
+    let speaker_handler = speaker_service.new_handler();
 
     if !config.debug_mode {
         info!("Starting Diag Thread");
@@ -234,6 +241,7 @@ async fn run_with_config(
             analysis_tx.clone(),
             config.analyzers.clone(),
             notification_service.new_handler(),
+            speaker_handler.clone(),
             config.min_space_to_start_recording_mb,
             config.min_space_to_continue_recording_mb,
             config.gps_mode,
@@ -292,6 +300,8 @@ async fn run_with_config(
         config.enabled_notifications.clone(),
     );
 
+    run_speaker_worker(&task_tracker, speaker_service, shutdown_token.clone());
+
     let wifi_status = Arc::new(RwLock::new(WifiStatus::default()));
     if !config.debug_mode {
         wifi_station::run_wifi_client(
@@ -336,6 +346,7 @@ async fn run_with_config(
         analysis_sender: analysis_tx,
         daemon_restart_token: restart_token.clone(),
         ui_update_sender: Some(ui_update_tx),
+        speaker_sender: speaker_handler,
         wifi_status,
         wifi_scan_lock: tokio::sync::Mutex::new(()),
         gps_state: Arc::new(tokio::sync::RwLock::new(initial_gps)),

@@ -10,7 +10,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   FILE_ROOTSHELL: ../../rootshell/rootshell
-  FILE_RAYHUNTER_DAEMON: ../../rayhunter-daemon/rayhunter-daemon
+  FILE_RAYCANARY_DAEMON: ../../raycanary-daemon/raycanary-daemon
   FILE_WPA_SUPPLICANT: ../../wpa-supplicant/wpa_supplicant
   FILE_WPA_CLI: ../../wpa-supplicant/wpa_cli
   FILE_IW: ../../wpa-supplicant/iw
@@ -154,7 +154,7 @@ jobs:
 
   installer_gui_check:
     # we test the GUI installer separately to:
-    # 1) mimic the default behavior of cargo commands for rayhunter devs where
+    # 1) mimic the default behavior of cargo commands for raycanary devs where
     #    installer-gui isn't one of the default workspace packages
     # 2) avoid slowing down development on changes unrelated to the GUI installer
     needs: files_changed
@@ -240,7 +240,7 @@ jobs:
           cd installer
           cargo test --verbose --no-default-features
 
-  build_rayhunter_check:
+  build_raycanary_check:
     if: needs.files_changed.outputs.daemon_changed == 'true'
     needs:
       - check_and_test
@@ -281,12 +281,12 @@ jobs:
         with:
           # Workaround for https://github.com/Swatinem/rust-cache/issues/341
           cache-bin: 'false'
-      - name: Build rayhunter-check
-        run: cargo build --bin rayhunter-check --release --target ${{ matrix.platform.target }}
+      - name: Build raycanary-check
+        run: cargo build --bin raycanary-check --release --target ${{ matrix.platform.target }}
       - uses: actions/upload-artifact@v4
         with:
-          name: rayhunter-check-${{ matrix.platform.name }}
-          path: target/${{ matrix.platform.target }}/release/rayhunter-check${{ matrix.platform.os == 'windows-latest' && '.exe' || '' }}
+          name: raycanary-check-${{ matrix.platform.name }}
+          path: target/${{ matrix.platform.target }}/release/raycanary-check${{ matrix.platform.os == 'windows-latest' && '.exe' || '' }}
           if-no-files-found: error
 
   build_rootshell:
@@ -337,7 +337,7 @@ jobs:
             tools/build-wpa-supplicant/out/iw
           if-no-files-found: error
 
-  build_rayhunter:
+  build_raycanary:
     if: needs.files_changed.outputs.daemon_needed == 'true'
     needs:
       - check_and_test
@@ -356,7 +356,7 @@ jobs:
           npm install
           npm run build
           popd
-      - name: Build rayhunter-daemon (armv7)
+      - name: Build raycanary-daemon (armv7)
         # Cross-compile inside messense/rust-musl-cross, which bundles an
         # arm-linux-musleabihf cross gcc that aws-lc-sys needs.
         run: |
@@ -371,8 +371,8 @@ jobs:
             cargo build-daemon-firmware
       - uses: actions/upload-artifact@v4
         with:
-          name: rayhunter-daemon
-          path: target/armv7-unknown-linux-musleabihf/firmware/rayhunter-daemon
+          name: raycanary-daemon
+          path: target/armv7-unknown-linux-musleabihf/firmware/raycanary-daemon
           if-no-files-found: error
 
   build_rust_installer:
@@ -381,7 +381,7 @@ jobs:
       contents: read
       packages: write
     needs:
-      - build_rayhunter
+      - build_raycanary
       - build_rootshell
       - build_wpa_supplicant
       - files_changed
@@ -433,7 +433,7 @@ jobs:
       contents: read
       packages: write
     needs:
-      - build_rayhunter
+      - build_raycanary
       - build_rootshell
       - build_wpa_supplicant
       - files_changed
@@ -490,7 +490,7 @@ jobs:
       contents: read
       packages: write
     needs:
-      - build_rayhunter
+      - build_raycanary
       - build_rootshell
       - build_wpa_supplicant
       - files_changed
@@ -525,7 +525,7 @@ jobs:
           npm run tauri build -- --target ${{ matrix.platform.target }}
           cd ..
           mv "target/${{ matrix.platform.target }}/release/bundle/macos/"*.app .
-          zip -r "rayhunter-installer-${{ matrix.platform.name }}.app.zip" ./*.app
+          zip -r "raycanary-installer-${{ matrix.platform.name }}.app.zip" ./*.app
       - uses: actions/upload-artifact@v4
         with:
           name: gui-installer-${{ matrix.platform.name }}-app
@@ -538,7 +538,7 @@ jobs:
       contents: read
       packages: write
     needs:
-      - build_rayhunter
+      - build_raycanary
       - build_rootshell
       - build_wpa_supplicant
       - files_changed
@@ -578,9 +578,9 @@ jobs:
       contents: read
       packages: write
     needs:
-      - build_rayhunter_check
+      - build_raycanary_check
       - build_rootshell
-      - build_rayhunter
+      - build_raycanary
       - build_rust_installer
     runs-on: ubuntu-latest
     strategy:
@@ -598,14 +598,14 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@v4
       - name: Fix executable permissions on binaries
-        run: chmod +x installer-*/installer rayhunter-check-*/rayhunter-check rayhunter-daemon/rayhunter-daemon
-      - name: Get Rayhunter version
+        run: chmod +x installer-*/installer raycanary-check-*/raycanary-check raycanary-daemon/raycanary-daemon
+      - name: Get RayCanary version
         id: get_version
         run: echo "VERSION=$(grep '^version' daemon/Cargo.toml | head -n 1 | cut -d'"' -f2)" >> $GITHUB_ENV
       - name: Setup versioned release directory
         run: |
           platform="${{ matrix.platform }}"
-          dest="rayhunter-v${VERSION}-${{ matrix.platform }}"
+          dest="raycanary-v${VERSION}-${{ matrix.platform }}"
           mkdir "$dest"
           # Handle installer with proper extension for Windows
           if [ "$platform" = "windows-x86_64" ]; then
@@ -613,17 +613,17 @@ jobs:
           else
             mv installer-$platform/installer "$dest"/installer
           fi
-          cp -r rayhunter-check-* rayhunter-daemon dist/scripts "$dest"/
+          cp -r raycanary-check-* raycanary-daemon dist/scripts "$dest"/
           zip -r "$dest.zip" "$dest"
           sha256sum "$dest.zip" > "$dest.zip.sha256"
 
       - name: Upload zip release and sha256
         uses: actions/upload-artifact@v4
         with:
-          name: rayhunter-v${{ env.VERSION }}-${{ matrix.platform }}
+          name: raycanary-v${{ env.VERSION }}-${{ matrix.platform }}
           path: |
-            rayhunter-v${{ env.VERSION }}-${{ matrix.platform }}.zip
-            rayhunter-v${{ env.VERSION }}-${{ matrix.platform }}.zip.sha256
+            raycanary-v${{ env.VERSION }}-${{ matrix.platform }}.zip
+            raycanary-v${{ env.VERSION }}-${{ matrix.platform }}.zip.sha256
           if-no-files-found: error
 
   openapi_build:
@@ -641,16 +641,16 @@ jobs:
         with:
           targets: armv7-unknown-linux-musleabihf
       - uses: Swatinem/rust-cache@v2
-      - name: Build rayhunter-daemon openapi docs
+      - name: Build raycanary-daemon openapi docs
         run: |
           mkdir -p daemon/web/build
-          touch daemon/web/build/{favicon.png,index.html.gz,rayhunter_orca_only.png,rayhunter_text.png}
-          cargo run --bin gen_api --features apidocs -- ./rayhunter-openapi.json
+          touch daemon/web/build/{favicon.png,index.html.gz,raycanary_orca_only.png,raycanary_text.png}
+          cargo run --bin gen_api --features apidocs -- ./raycanary-openapi.json
       - name: Make swagger folder
         run: |
           mkdir api-docs
           mv doc/swagger-ui.html api-docs/index.html
-          mv rayhunter-openapi.json api-docs/
+          mv raycanary-openapi.json api-docs/
       - uses: actions/upload-artifact@v4
         with:
           name: api-docs

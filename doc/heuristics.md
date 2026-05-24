@@ -1,6 +1,6 @@
 # Heuristics
 
-Rayhunter includes several analyzers to detect potential IMSI catcher activity. These can be enabled and disabled in your [configuration](./configuration.md) file.
+RayCanary includes several analyzers to detect potential IMSI catcher activity. These can be enabled and disabled in your [configuration](./configuration.md) file.
 
 ## Available Analyzers
 
@@ -78,4 +78,4 @@ This analyzer displays some diagnostic information about when your device connec
 
 ### Test Analyzer
 
-This analyzer is great for testing if your Rayhunter installation works. It will alert every time a new tower is seen (specifically every time a tower broadcasts a SIB1 message.) It is designed to be very noisy so we do not recommend leaving it on but if this alerts it means your Rayhunter device is working! 
+This analyzer is great for testing if your RayCanary installation works. It will alert every time a new tower is seen (specifically every time a tower broadcasts a SIB1 message.) It is designed to be very noisy so we do not recommend leaving it on but if this alerts it means your RayCanary device is working! 

@@ -4,8 +4,8 @@ use std::path::Path;
 /// Installation process:
 /// 1. Use curl to activate USB debugging backdoor
 /// 2. Wait for device reboot and ADB availability
-/// 3. Use ADB to install rayhunter files
-/// 4. Modify startup script to launch rayhunter on boot
+/// 3. Use ADB to install raycanary files
+/// 4. Modify startup script to launch raycanary on boot
 use std::time::Duration;
 
 use adb_client::{ADBDeviceExt, ADBUSBDevice, RustADBError};
@@ -29,8 +29,8 @@ async fn run_install(admin_ip: String) -> Result<()> {
     let mut adb_device = wait_for_adb().await?;
     println!("ok");
 
-    print!("Installing rayhunter files... ");
-    install_rayhunter_files(&mut adb_device).await?;
+    print!("Installing raycanary files... ");
+    install_raycanary_files(&mut adb_device).await?;
     println!("ok");
 
     print!("Modifying startup script... ");
@@ -43,7 +43,7 @@ async fn run_install(admin_ip: String) -> Result<()> {
 
     println!("Installation complete!");
     println!("Please wait for the device to reboot (light will turn green)");
-    println!("Then access rayhunter at: http://{admin_ip}:8080");
+    println!("Then access raycanary at: http://{admin_ip}:8080");
 
     Ok(())
 }
@@ -139,31 +139,31 @@ async fn test_adb_connection(adb_device: &mut ADBUSBDevice) -> Result<()> {
     }
 }
 
-async fn install_rayhunter_files(adb_device: &mut ADBUSBDevice) -> Result<()> {
-    // Create rayhunter directory
+async fn install_raycanary_files(adb_device: &mut ADBUSBDevice) -> Result<()> {
+    // Create raycanary directory
     let mut buf = Vec::<u8>::new();
-    adb_device.shell_command(&["mkdir", "-p", "/data/rayhunter"], &mut buf)?;
+    adb_device.shell_command(&["mkdir", "-p", "/data/raycanary"], &mut buf)?;
 
     // Remount system as writable
     adb_device.shell_command(&["mount", "-o", "remount,rw", "/system"], &mut buf)?;
 
-    // Install rayhunter daemon binary with verification
-    let rayhunter_daemon_bin = crate::get_file!("FILE_RAYHUNTER_DAEMON");
+    // Install raycanary daemon binary with verification
+    let raycanary_daemon_bin = crate::get_file!("FILE_RAYCANARY_DAEMON");
     install_file(
         adb_device,
-        "/data/rayhunter/rayhunter-daemon",
-        rayhunter_daemon_bin,
+        "/data/raycanary/raycanary-daemon",
+        raycanary_daemon_bin,
     )?;
 
     // Install config file
     let config_content = crate::CONFIG_TOML.replace("#device = \"orbic\"", "device = \"uz801\"");
     let mut config_data = config_content.as_bytes();
-    adb_device.push(&mut config_data, &"/data/rayhunter/config.toml")?;
+    adb_device.push(&mut config_data, &"/data/raycanary/config.toml")?;
 
     // Make daemon executable
     let mut buf = Vec::<u8>::new();
     adb_device.shell_command(
-        &["chmod", "755", "/data/rayhunter/rayhunter-daemon"],
+        &["chmod", "755", "/data/raycanary/raycanary-daemon"],
         &mut buf,
     )?;
 
@@ -232,10 +232,10 @@ async fn modify_startup_script(adb_device: &mut ADBUSBDevice) -> Result<()> {
     // Convert to string and add our line
     let mut script_str = String::from_utf8_lossy(&script_content).into_owned();
 
-    // Add rayhunter startup line if not already present
-    let rayhunter_line = "/data/rayhunter/rayhunter-daemon /data/rayhunter/config.toml &\n";
-    if !script_str.contains("/data/rayhunter/rayhunter-daemon") {
-        script_str.push_str(rayhunter_line);
+    // Add raycanary startup line if not already present
+    let raycanary_line = "/data/raycanary/raycanary-daemon /data/raycanary/config.toml &\n";
+    if !script_str.contains("/data/raycanary/raycanary-daemon") {
+        script_str.push_str(raycanary_line);
     }
 
     // Push the modified script back

@@ -6,7 +6,7 @@ body:
     attributes:
       label: Prerequisites
       options:
-        - label: I have read [CONTRIBUTING.md](https://github.com/EFForg/rayhunter/blob/main/CONTRIBUTING.md)
+        - label: I have read [CONTRIBUTING.md](https://github.com/GreerBK/raycanary/blob/main/CONTRIBUTING.md)
           required: true
   - type: textarea
     attributes:
@@ -14,12 +14,12 @@ body:
       description: |
         Please provide the following information, if applicable:
       placeholder: |
-        • **Rayhunter Version**: (e.g., v0.2.6)
+        • **RayCanary Version**: (e.g., v0.2.6)
         • **Capture Date**: (YYYY-MM-DD, e.g., 2025-05-01)
         • **Capture Location**: (If comfortable disclosing, what region or country were you in? e.g., Washington State)
-        • **Device and Model**: (Device you installed Rayhunter on, e.g., Orbic RC400L)
+        • **Device and Model**: (Device you installed RayCanary on, e.g., Orbic RC400L)
         • **What happened?**: (What steps did you take to get to your issue? Tell us what you see!)
-        • **Expected behavior**: (Rayhunter's behavior differed from what I expected because...)
-        • **Relevant log output**: (Rayhunter data captures - QMDL and PCAP logs - or error codes)
+        • **Expected behavior**: (RayCanary's behavior differed from what I expected because...)
+        • **Relevant log output**: (RayCanary data captures - QMDL and PCAP logs - or error codes)
     validations:
       required: true

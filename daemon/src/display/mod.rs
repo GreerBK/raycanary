@@ -1,4 +1,4 @@
-use rayhunter::analysis::analyzer::EventType;
+use raycanary::analysis::analyzer::EventType;
 use serde::{Deserialize, Serialize};
 
 mod generic_framebuffer;

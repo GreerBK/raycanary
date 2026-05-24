@@ -12,7 +12,7 @@ use nusb::transfer::{Control, ControlType, Recipient, RequestBuffer};
 use sha2::{Digest, Sha256};
 use tokio::time::sleep;
 
-use crate::RAYHUNTER_DAEMON_INIT;
+use crate::RAYCANARY_DAEMON_INIT;
 use crate::connection::{DeviceConnection, install_config, install_wifi_tools};
 use crate::output::{print, println};
 use crate::util::open_usb_device;
@@ -55,7 +55,7 @@ pub struct AdbConnection<'a> {
 impl DeviceConnection for AdbConnection<'_> {
     /// Runs through /bin/rootshell so commands execute as root (install_wifi_tools needs
     /// chmod on root-owned files). setup_rootshell must have succeeded before an
-    /// AdbConnection is created; callers in this module (setup_rayhunter) enforce that
+    /// AdbConnection is created; callers in this module (setup_raycanary) enforce that
     /// ordering.
     async fn run_command(&mut self, command: &str) -> Result<String> {
         adb_command(
@@ -102,11 +102,11 @@ pub async fn install(reset_config: bool) -> Result<()> {
     print!("Installing rootshell... ");
     setup_rootshell(&mut adb_device).await?;
     println!("done");
-    print!("Installing rayhunter... ");
-    let mut adb_device = setup_rayhunter(adb_device, reset_config).await?;
+    print!("Installing raycanary... ");
+    let mut adb_device = setup_raycanary(adb_device, reset_config).await?;
     println!("done");
-    print!("Testing rayhunter... ");
-    test_rayhunter(&mut adb_device).await?;
+    print!("Testing raycanary... ");
+    test_raycanary(&mut adb_device).await?;
     println!("done");
     Ok(())
 }
@@ -150,18 +150,18 @@ async fn setup_rootshell(adb_device: &mut ADBUSBDevice) -> Result<()> {
     Ok(())
 }
 
-async fn setup_rayhunter(mut adb_device: ADBUSBDevice, reset_config: bool) -> Result<ADBUSBDevice> {
-    let rayhunter_daemon_bin = crate::get_file!("FILE_RAYHUNTER_DAEMON");
+async fn setup_raycanary(mut adb_device: ADBUSBDevice, reset_config: bool) -> Result<ADBUSBDevice> {
+    let raycanary_daemon_bin = crate::get_file!("FILE_RAYCANARY_DAEMON");
 
     adb_at_syscmd(
         &mut adb_device,
-        "mkdir -p /data/rayhunter/scripts /data/rayhunter/bin",
+        "mkdir -p /data/raycanary/scripts /data/raycanary/bin",
     )
     .await?;
     install_file(
         &mut adb_device,
-        "/data/rayhunter/rayhunter-daemon",
-        rayhunter_daemon_bin,
+        "/data/raycanary/raycanary-daemon",
+        raycanary_daemon_bin,
     )
     .await?;
 
@@ -175,8 +175,8 @@ async fn setup_rayhunter(mut adb_device: ADBUSBDevice, reset_config: bool) -> Re
 
     install_file(
         &mut adb_device,
-        "/etc/init.d/rayhunter_daemon",
-        RAYHUNTER_DAEMON_INIT.as_bytes(),
+        "/etc/init.d/raycanary_daemon",
+        RAYCANARY_DAEMON_INIT.as_bytes(),
     )
     .await?;
     install_file(
@@ -185,7 +185,7 @@ async fn setup_rayhunter(mut adb_device: ADBUSBDevice, reset_config: bool) -> Re
         include_bytes!("../../dist/scripts/misc-daemon"),
     )
     .await?;
-    adb_at_syscmd(&mut adb_device, "chmod 755 /etc/init.d/rayhunter_daemon").await?;
+    adb_at_syscmd(&mut adb_device, "chmod 755 /etc/init.d/raycanary_daemon").await?;
     adb_at_syscmd(&mut adb_device, "chmod 755 /etc/init.d/misc-daemon").await?;
     println!("done");
     print!("Waiting for reboot... ");
@@ -203,8 +203,8 @@ async fn setup_rayhunter(mut adb_device: ADBUSBDevice, reset_config: bool) -> Re
     get_adb().await
 }
 
-/// Test rayhunter on the device over adb without forwarding.
-pub async fn test_rayhunter(adb_device: &mut ADBUSBDevice) -> Result<()> {
+/// Test raycanary on the device over adb without forwarding.
+pub async fn test_raycanary(adb_device: &mut ADBUSBDevice) -> Result<()> {
     const MAX_FAILURES: u32 = 10;
     let mut failures = 0;
     while failures < MAX_FAILURES {
@@ -218,7 +218,7 @@ pub async fn test_rayhunter(adb_device: &mut ADBUSBDevice) -> Result<()> {
         failures += 1;
         sleep(Duration::from_secs(3)).await;
     }
-    bail!("timeout reached! failed to reach rayhunter, something went wrong :(")
+    bail!("timeout reached! failed to reach raycanary, something went wrong :(")
 }
 
 async fn install_file(adb_device: &mut ADBUSBDevice, dest: &str, payload: &[u8]) -> Result<()> {

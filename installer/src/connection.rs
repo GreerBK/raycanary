@@ -23,14 +23,14 @@ pub async fn file_exists<C: DeviceConnection>(conn: &mut C, path: &str) -> bool 
         .unwrap_or(false)
 }
 
-/// Shared config installation logic. Installs to /data/rayhunter/config.toml which resolves
+/// Shared config installation logic. Installs to /data/raycanary/config.toml which resolves
 /// through the symlink to the actual data directory.
 pub async fn install_config<C: DeviceConnection>(
     conn: &mut C,
     device_type: &str,
     reset_config: bool,
 ) -> Result<()> {
-    let config_path = "/data/rayhunter/config.toml";
+    let config_path = "/data/raycanary/config.toml";
     if reset_config || !file_exists(conn, config_path).await {
         let config = crate::CONFIG_TOML.replace(
             r#"#device = "orbic""#,
@@ -43,7 +43,7 @@ pub async fn install_config<C: DeviceConnection>(
     Ok(())
 }
 
-/// Install wifi tools (wpa_supplicant, wpa_cli, iw) to /data/rayhunter/bin.
+/// Install wifi tools (wpa_supplicant, wpa_cli, iw) to /data/raycanary/bin.
 ///
 /// Skips any binary that is already present on the device (e.g. provided by firmware),
 /// since those may be newer or better-integrated than the bundled versions.
@@ -59,15 +59,15 @@ pub async fn install_wifi_tools<C: DeviceConnection>(conn: &mut C) -> Result<()>
     let tools: &[(&str, &str, &[u8])] = &[
         (
             "wpa_supplicant",
-            "/data/rayhunter/bin/wpa_supplicant",
+            "/data/raycanary/bin/wpa_supplicant",
             crate::get_file!("FILE_WPA_SUPPLICANT"),
         ),
         (
             "wpa_cli",
-            "/data/rayhunter/bin/wpa_cli",
+            "/data/raycanary/bin/wpa_cli",
             crate::get_file!("FILE_WPA_CLI"),
         ),
-        ("iw", "/data/rayhunter/bin/iw", crate::get_file!("FILE_IW")),
+        ("iw", "/data/raycanary/bin/iw", crate::get_file!("FILE_IW")),
     ];
     for &(name, dest, payload) in tools {
         if device_has_binary(conn, name).await {
@@ -124,16 +124,16 @@ pub async fn readlink<C: DeviceConnection>(conn: &mut C, path: &str) -> Result<S
     bail!("unexpected readlink output: {output:?}");
 }
 
-/// Set up the data directory at `data_dir` and create a symlink from `/data/rayhunter` to it.
+/// Set up the data directory at `data_dir` and create a symlink from `/data/raycanary` to it.
 ///
 /// Handles migration from old locations:
-/// - If `/data/rayhunter` is a real directory, moves its contents to `data_dir`
-/// - If `/data/rayhunter` is a symlink to a different location, moves from the old target
-/// - If `/data/rayhunter` doesn't exist, just creates the symlink
-/// - If `/data/rayhunter` is a symlink to `data_dir`, does nothing
+/// - If `/data/raycanary` is a real directory, moves its contents to `data_dir`
+/// - If `/data/raycanary` is a symlink to a different location, moves from the old target
+/// - If `/data/raycanary` doesn't exist, just creates the symlink
+/// - If `/data/raycanary` is a symlink to `data_dir`, does nothing
 pub async fn setup_data_directory<C: DeviceConnection>(conn: &mut C, data_dir: &str) -> Result<()> {
-    if data_dir == "/data/rayhunter" {
-        bail!("data_dir must not be /data/rayhunter");
+    if data_dir == "/data/raycanary" {
+        bail!("data_dir must not be /data/raycanary");
     }
 
     if data_dir.contains("'") {
@@ -141,36 +141,36 @@ pub async fn setup_data_directory<C: DeviceConnection>(conn: &mut C, data_dir: &
     }
 
     // Determine where old data lives, if anywhere
-    let old_data_source = if is_symlink(conn, "/data/rayhunter").await {
-        let current_target = readlink(conn, "/data/rayhunter").await?;
+    let old_data_source = if is_symlink(conn, "/data/raycanary").await {
+        let current_target = readlink(conn, "/data/raycanary").await?;
         if current_target == data_dir {
             println!("Data directory already configured at {data_dir}");
             return Ok(());
         }
-        conn.run_command("rm -f /data/rayhunter").await?;
+        conn.run_command("rm -f /data/raycanary").await?;
         // The old symlink target is where data actually lives
         if dir_exists(conn, &current_target).await {
             Some(current_target)
         } else {
             None
         }
-    } else if dir_exists(conn, "/data/rayhunter").await {
+    } else if dir_exists(conn, "/data/raycanary").await {
         if dir_exists(conn, data_dir).await {
-            bail!("Both /data/rayhunter and {data_dir} exist and are directories.");
+            bail!("Both /data/raycanary and {data_dir} exist and are directories.");
         }
         // Real directory (pre-migration Orbic state)
-        Some("/data/rayhunter".to_string())
+        Some("/data/raycanary".to_string())
     } else {
         None
     };
 
     // Migrate old data if present
     if let Some(old_source) = &old_data_source {
-        // Stop rayhunter-daemon so it doesn't write during migration.
+        // Stop raycanary-daemon so it doesn't write during migration.
         // The device will be rebooted at the end of installation anyway.
-        print!("Stopping rayhunter-daemon ... ");
+        print!("Stopping raycanary-daemon ... ");
         let _ = conn
-            .run_command("/etc/init.d/rayhunter_daemon stop 2>/dev/null; true")
+            .run_command("/etc/init.d/raycanary_daemon stop 2>/dev/null; true")
             .await;
         println!("ok");
 
@@ -194,9 +194,9 @@ pub async fn setup_data_directory<C: DeviceConnection>(conn: &mut C, data_dir: &
     }
 
     // Create the symlink
-    print!("Creating symlink /data/rayhunter -> {data_dir} ... ");
+    print!("Creating symlink /data/raycanary -> {data_dir} ... ");
     conn.run_command("mkdir -p /data").await?;
-    conn.run_command(&format!("ln -sf '{data_dir}' /data/rayhunter"))
+    conn.run_command(&format!("ln -sf '{data_dir}' /data/raycanary"))
         .await?;
     println!("ok");
 

@@ -76,20 +76,20 @@
             Clock Mismatch Detected
         </span>
         <p>
-            Rayhunter's clock doesn't match your browser's, and may be incorrect. This can happen if
-            Rayhunter is unable to get the correct time from the internet. Consider synchronizing
+            RayCanary's clock doesn't match your browser's, and may be incorrect. This can happen if
+            RayCanary is unable to get the correct time from the internet. Consider synchronizing
             your browser's clock with the button below, or using another SIM card for better
             results.
         </p>
         <table class="w-fit">
             <tbody>
                 <tr>
-                    <td class="pr-2">Rayhunter clock (system):</td>
+                    <td class="pr-2">RayCanary clock (system):</td>
                     <td class="font-mono">{device_system_time}</td>
                 </tr>
                 {#if has_offset}
                     <tr>
-                        <td class="pr-2">Rayhunter clock (adjusted):</td>
+                        <td class="pr-2">RayCanary clock (adjusted):</td>
                         <td class="font-mono">{device_adjusted_time}</td>
                     </tr>
                 {/if}

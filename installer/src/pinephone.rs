@@ -10,10 +10,10 @@ use nusb::transfer::{Control, ControlType, Recipient, RequestBuffer};
 use tokio::time::sleep;
 
 use crate::connection::DeviceConnection;
-use crate::orbic::test_rayhunter;
+use crate::orbic::test_raycanary;
 use crate::output::{print, println};
 use crate::util::open_usb_device;
-use crate::{CONFIG_TOML, RAYHUNTER_DAEMON_INIT};
+use crate::{CONFIG_TOML, RAYCANARY_DAEMON_INIT};
 
 const USB_VENDOR_ID: u16 = 0x2C7C;
 const USB_PRODUCT_ID: u16 = 0x125;
@@ -27,21 +27,21 @@ pub async fn install() -> Result<()> {
     println!("ok");
 
     run_command_expect(&mut adb, "mount -o remount,rw /", "exit code 0").await?;
-    run_command_expect(&mut adb, "mkdir -p /data/rayhunter", "exit code 0").await?;
+    run_command_expect(&mut adb, "mkdir -p /data/raycanary", "exit code 0").await?;
 
-    let rayhunter_daemon_bin = crate::get_file!("FILE_RAYHUNTER_DAEMON");
-    adb.write_file("/data/rayhunter/rayhunter-daemon", rayhunter_daemon_bin)
+    let raycanary_daemon_bin = crate::get_file!("FILE_RAYCANARY_DAEMON");
+    adb.write_file("/data/raycanary/raycanary-daemon", raycanary_daemon_bin)
         .await?;
     adb.write_file(
-        "/data/rayhunter/config.toml",
+        "/data/raycanary/config.toml",
         CONFIG_TOML
             .replace("#device = \"orbic\"", "device = \"pinephone\"")
             .as_bytes(),
     )
     .await?;
     adb.write_file(
-        "/etc/init.d/rayhunter_daemon",
-        RAYHUNTER_DAEMON_INIT.as_bytes(),
+        "/etc/init.d/raycanary_daemon",
+        RAYCANARY_DAEMON_INIT.as_bytes(),
     )
     .await?;
     adb.write_file(
@@ -51,7 +51,7 @@ pub async fn install() -> Result<()> {
     .await?;
     run_command_expect(
         &mut adb,
-        "chmod 755 /etc/init.d/rayhunter_daemon",
+        "chmod 755 /etc/init.d/raycanary_daemon",
         "exit code 0",
     )
     .await?;
@@ -67,10 +67,10 @@ pub async fn install() -> Result<()> {
     let mut adb = ADBUSBDevice::new(USB_VENDOR_ID, USB_PRODUCT_ID).unwrap();
     println!("ok");
 
-    print!("Testing rayhunter ... ");
-    test_rayhunter(&mut adb).await?;
+    print!("Testing raycanary ... ");
+    test_raycanary(&mut adb).await?;
     println!("ok");
-    println!("rayhunter is running on the modem. Use adb to access the web interface.");
+    println!("raycanary is running on the modem. Use adb to access the web interface.");
 
     Ok(())
 }

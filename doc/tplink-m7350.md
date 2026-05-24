@@ -1,6 +1,6 @@
 # TP-Link M7350
 
-Supported in Rayhunter since version 0.3.0.
+Supported in RayCanary since version 0.3.0.
 
 The TP-Link M7350 supports many more frequency bands than Orbic and therefore works in Europe and also in some Asian and African countries.
 
@@ -18,11 +18,11 @@ The TP-Link M7350 supports many more frequency bands than Orbic and therefore wo
 
 The TP-Link comes in many different *hardware versions*. Support for installation varies:
 
-* `1.0`, Confirmed working. Successfully tested by a user with the Windows installer (rayhunter-v0.10.2-windows-x86_64). Ensure the SD card is formatted as FAT32 before installation.
+* `1.0`, Confirmed working. Successfully tested by a user with the Windows installer (raycanary-v0.10.2-windows-x86_64). Ensure the SD card is formatted as FAT32 before installation.
 * `2.0`: **Not supported**, devs are not able to obtain a device
 * `3.0`, `3.2`, `5.0`, `5.2`, `7.0`, `8.0`: **Tested, no known issues since 0.3.0.**
 * `6.2`: **One user reported it is working, not tested**
-* `4.0`: **Manual firmware downgrade required** ([issue](https://github.com/EFForg/rayhunter/issues/332))
+* `4.0`: **Manual firmware downgrade required** ([issue](https://github.com/GreerBK/raycanary/issues/332))
 * `9.0`: **Working since 0.3.2.**
 
 TP-Link versions newer than `3.0` have cyan packaging and a color display. Version `3.0` has a one-bit display and white packaging.
@@ -46,7 +46,7 @@ To get started, follow the [release installation guide](./installing-from-releas
 ./installer tplink
 ```
 
-The Rayhunter UI will be available at <http://192.168.0.1:8080>.
+The RayCanary UI will be available at <http://192.168.0.1:8080>.
 
 <a name=shell></a>
 ## Obtaining a shell
@@ -59,9 +59,9 @@ You can obtain a root shell with the following command:
 
 ## Display states
 
-If your device has a color display, Rayhunter will show the same red/green/white line at the top of the display as it does on Orbic, each color meaning "warning"/"recording"/"paused" respectively. See [Using Rayhunter](./using-rayhunter.md).
+If your device has a color display, RayCanary will show the same red/green/white line at the top of the display as it does on Orbic, each color meaning "warning"/"recording"/"paused" respectively. See [Using RayCanary](./using-raycanary.md).
 
-If your device has a one-bit (black-and-white) display, Rayhunter will instead show an emoji to indicate status:
+If your device has a one-bit (black-and-white) display, RayCanary will instead show an emoji to indicate status:
 
 * `!` means "warning (potential IMSI catcher)"
 * `:)` (smiling) means "recording"
@@ -70,7 +70,7 @@ If your device has a one-bit (black-and-white) display, Rayhunter will instead s
 ## Power-saving mode/sleep
 
 By default the device will go to sleep after N minutes of no devices being connected. In that mode it will also turn off connections to cell phone towers.
-In order for Rayhunter to record continuously, you have to turn off this sleep mode in TP-Link's admin panel (go to **Advanced** - **Power Saving**) or keep e.g. your phone connected on the TP-Link's WiFi.
+In order for RayCanary to record continuously, you have to turn off this sleep mode in TP-Link's admin panel (go to **Advanced** - **Power Saving**) or keep e.g. your phone connected on the TP-Link's WiFi.
 
 ## Port triggers
 
@@ -78,9 +78,9 @@ On hardware revisions starting with v4.0, the installer will modify settings to
 add two port triggers. You can look at `Settings > NAT Settings > Port
 Triggers` in TP-Link's admin UI to see them.
 
-1. One port trigger "rayhunter-root" to launch the telnet shell. This is only needed for installation, and can be removed after upgrade. You can reinstall it using `./installer util tplink-shell`.
-2. One port trigger "rayhunter-daemon" to auto-start Rayhunter on boot. If you remove this, Rayhunter will have to be started manually from shell.
+1. One port trigger "raycanary-root" to launch the telnet shell. This is only needed for installation, and can be removed after upgrade. You can reinstall it using `./installer util tplink-shell`.
+2. One port trigger "raycanary-daemon" to auto-start RayCanary on boot. If you remove this, RayCanary will have to be started manually from shell.
 
 ## Other links
 
-For more information on the device and instructions on how to install Rayhunter without an installer (i.e. manually), please see [rayhunter-tplink-m7350](https://github.com/m0veax/rayhunter-tplink-m7350/)
+For more information on the device and instructions on how to install RayCanary without an installer (i.e. manually), please see [raycanary-tplink-m7350](https://github.com/m0veax/raycanary-tplink-m7350/)

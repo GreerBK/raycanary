@@ -1,16 +1,16 @@
-# How to contribute to Rayhunter
+# How to contribute to RayCanary
 
 ## Filing issues and starting discussions
 
-Our issue tracker is [on GitHub](https://github.com/EFForg/rayhunter/issues).
+Our issue tracker is [on GitHub](https://github.com/GreerBK/raycanary/issues).
 
-- If your rayhunter has found an IMSI-catcher, we strongly encourage you to
+- If your raycanary has found an IMSI-catcher, we strongly encourage you to
   [send us that information
-  privately.](https://efforg.github.io/rayhunter/faq.html#help-rayhunters-line-is-redorangeyellowdotteddashed-what-should-i-do) via Signal.
+  privately.](https://greerbk.github.io/raycanary/faq.html#help-raycanarys-line-is-redorangeyellowdotteddashed-what-should-i-do) via Signal.
 
 - Issues should be actionable. If you don't have a
   specific feature request or bug report, consider [creating a
-  discussion](https://github.com/EFForg/rayhunter/discussions) or [joining our Mattermost](https://efforg.github.io/rayhunter/support-feedback-community.html) instead.
+  discussion](https://github.com/GreerBK/raycanary/discussions) or [joining our Mattermost](https://greerbk.github.io/raycanary/support-feedback-community.html) instead.
 
   Example of a good bug report:
 
@@ -49,8 +49,8 @@ filing an issue.
 Otherwise:
 
 - Refer to [installing from
-  source](https://efforg.github.io/rayhunter/installing-from-source.html) for
-  how to build Rayhunter from the git repository.
+  source](https://greerbk.github.io/raycanary/installing-from-source.html) for
+  how to build RayCanary from the git repository.
 
 - Ensure that `cargo fmt` and `cargo clippy` have been run.
 
@@ -60,7 +60,7 @@ Otherwise:
 
 - Please keep your contributions to less than approximately 400 lines of code not counting tests, (going slightly over is fine, we aren't dogmatic about it.) This is because we are not able to give quality code review to contributions larger than that and risk introducing bugs into the system. [There was a study showing 400 LOC is the max most humans can handle.](https://smartbear.com/learn/code-review/best-practices-for-peer-code-review/)
 
-If you have any questions [feel free to open a discussion or chat with us on Mattermost.](https://efforg.github.io/rayhunter/support-feedback-community.html)
+If you have any questions [feel free to open a discussion or chat with us on Mattermost.](https://greerbk.github.io/raycanary/support-feedback-community.html)
 
 ### Policy regarding AI-generated contributions:
 
@@ -72,7 +72,7 @@ You can read our [full policy](https://www.eff.org/about/opportunities/volunteer
 
 ## Making releases
 
-This one is for maintainers of Rayhunter.
+This one is for maintainers of RayCanary.
 
 1. Make a PR changing the versions in `Cargo.toml` and other files.
    This could be automated better but right now it's manual. You can do this easily with sed:
@@ -80,6 +80,6 @@ This one is for maintainers of Rayhunter.
 
 2. Merge PR and make a tag.
 
-3. [Run release workflow.](https://github.com/EFForg/rayhunter/actions/workflows/release.yml)
+3. [Run release workflow.](https://github.com/GreerBK/raycanary/actions/workflows/release.yml)
 
 4. Write changelog, edit it into the release, announce on mattermost.

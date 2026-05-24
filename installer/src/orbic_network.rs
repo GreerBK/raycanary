@@ -7,7 +7,7 @@ use reqwest::Client;
 use serde::Deserialize;
 use tokio::time::sleep;
 
-use crate::RAYHUNTER_DAEMON_INIT;
+use crate::RAYCANARY_DAEMON_INIT;
 use crate::connection::{
     TelnetConnection, install_config, install_wifi_tools, setup_data_directory,
 };
@@ -172,7 +172,7 @@ pub async fn install(
             "As of version 0.8.0, the orbic installer has been rewritten and now requires an --admin-password parameter."
         );
         eprintln!(
-            "Refer to the official documentation at https://efforg.github.io/rayhunter/ for how to find the right value."
+            "Refer to the official documentation at https://greerbk.github.io/raycanary/ for how to find the right value."
         );
         eprintln!();
         eprintln!(
@@ -189,8 +189,8 @@ pub async fn install(
     wait_for_telnet(&admin_ip).await?;
     println!("done");
 
-    let data_dir = data_dir.unwrap_or_else(|| "/data/rayhunter-data".to_string());
-    setup_rayhunter(&admin_ip, reset_config, &data_dir).await
+    let data_dir = data_dir.unwrap_or_else(|| "/data/raycanary-data".to_string());
+    setup_raycanary(&admin_ip, reset_config, &data_dir).await
 }
 
 async fn wait_for_telnet(admin_ip: &str) -> Result<()> {
@@ -214,9 +214,9 @@ async fn wait_for_telnet(admin_ip: &str) -> Result<()> {
     Ok(())
 }
 
-async fn setup_rayhunter(admin_ip: &str, reset_config: bool, data_dir: &str) -> Result<()> {
+async fn setup_raycanary(admin_ip: &str, reset_config: bool, data_dir: &str) -> Result<()> {
     let addr = SocketAddr::from_str(&format!("{admin_ip}:{TELNET_PORT}"))?;
-    let rayhunter_daemon_bin = crate::get_file!("FILE_RAYHUNTER_DAEMON");
+    let raycanary_daemon_bin = crate::get_file!("FILE_RAYCANARY_DAEMON");
 
     // Remount filesystem as read-write to allow modifications
     // This is really only necessary for the Moxee Hotspot
@@ -234,7 +234,7 @@ async fn setup_rayhunter(admin_ip: &str, reset_config: bool, data_dir: &str) -> 
     // Ensure bin and scripts directories exist under the data dir (via symlink)
     telnet_send_command(
         addr,
-        "mkdir -p /data/rayhunter/scripts /data/rayhunter/bin",
+        "mkdir -p /data/raycanary/scripts /data/raycanary/bin",
         "exit code 0",
         false,
     )
@@ -242,8 +242,8 @@ async fn setup_rayhunter(admin_ip: &str, reset_config: bool, data_dir: &str) -> 
 
     telnet_send_file(
         addr,
-        "/data/rayhunter/rayhunter-daemon",
-        rayhunter_daemon_bin,
+        "/data/raycanary/raycanary-daemon",
+        raycanary_daemon_bin,
         false,
     )
     .await?;
@@ -254,8 +254,8 @@ async fn setup_rayhunter(admin_ip: &str, reset_config: bool, data_dir: &str) -> 
 
     telnet_send_file(
         addr,
-        "/etc/init.d/rayhunter_daemon",
-        RAYHUNTER_DAEMON_INIT.as_bytes(),
+        "/etc/init.d/raycanary_daemon",
+        RAYCANARY_DAEMON_INIT.as_bytes(),
         false,
     )
     .await?;
@@ -270,14 +270,14 @@ async fn setup_rayhunter(admin_ip: &str, reset_config: bool, data_dir: &str) -> 
 
     telnet_send_command(
         addr,
-        "chmod +x /data/rayhunter/rayhunter-daemon",
+        "chmod +x /data/raycanary/raycanary-daemon",
         "exit code 0",
         false,
     )
     .await?;
     telnet_send_command(
         addr,
-        "chmod 755 /etc/init.d/rayhunter_daemon",
+        "chmod 755 /etc/init.d/raycanary_daemon",
         "exit code 0",
         false,
     )

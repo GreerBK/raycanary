@@ -1,10 +1,10 @@
 blank_issues_enabled: false
 contact_links:
   - name: Frequently Asked Questions
-    url: https://efforg.github.io/rayhunter/faq.html
+    url: https://greerbk.github.io/raycanary/faq.html
   - name: Questions and community
-    url: https://efforg.github.io/rayhunter/support-feedback-community.html
-    about: If you're having trouble using Rayhunter and aren't sure you've found a bug or request for a new feature, please first try asking for help on GitHub discussions or Mattermost
-  - name: Rayhunter Security Policy
-    url: https://github.com/EFForg/rayhunter/security/advisories/new
+    url: https://greerbk.github.io/raycanary/support-feedback-community.html
+    about: If you're having trouble using RayCanary and aren't sure you've found a bug or request for a new feature, please first try asking for help on GitHub discussions or Mattermost
+  - name: RayCanary Security Policy
+    url: https://github.com/GreerBK/raycanary/security/advisories/new
     about: Please report security vulnerabilities here.

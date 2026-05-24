@@ -33,14 +33,14 @@ async fn run_install(admin_ip: String, admin_password: String) -> Result<()> {
 
     print!("Connecting via telnet to {admin_ip} ... ");
     let addr = SocketAddr::from_str(&format!("{admin_ip}:23")).unwrap();
-    telnet_send_command(addr, "mkdir -p /data/rayhunter", "exit code 0", true).await?;
+    telnet_send_command(addr, "mkdir -p /data/raycanary", "exit code 0", true).await?;
     println!("ok");
 
     telnet_send_command(addr, "mount -o remount,rw /", "exit code 0", true).await?;
 
     telnet_send_file(
         addr,
-        "/data/rayhunter/config.toml",
+        "/data/raycanary/config.toml",
         crate::CONFIG_TOML
             .replace("#device = \"orbic\"", "device = \"tmobile\"")
             .as_bytes(),
@@ -48,17 +48,17 @@ async fn run_install(admin_ip: String, admin_password: String) -> Result<()> {
     )
     .await?;
 
-    let rayhunter_daemon_bin = crate::get_file!("FILE_RAYHUNTER_DAEMON");
+    let raycanary_daemon_bin = crate::get_file!("FILE_RAYCANARY_DAEMON");
     telnet_send_file(
         addr,
-        "/data/rayhunter/rayhunter-daemon",
-        rayhunter_daemon_bin,
+        "/data/raycanary/raycanary-daemon",
+        raycanary_daemon_bin,
         true,
     )
     .await?;
     telnet_send_command(
         addr,
-        "chmod 755 /data/rayhunter/rayhunter-daemon",
+        "chmod 755 /data/raycanary/raycanary-daemon",
         "exit code 0",
         true,
     )
@@ -79,14 +79,14 @@ async fn run_install(admin_ip: String, admin_password: String) -> Result<()> {
     .await?;
     telnet_send_file(
         addr,
-        "/etc/init.d/rayhunter_daemon",
-        crate::RAYHUNTER_DAEMON_INIT.as_bytes(),
+        "/etc/init.d/raycanary_daemon",
+        crate::RAYCANARY_DAEMON_INIT.as_bytes(),
         true,
     )
     .await?;
     telnet_send_command(
         addr,
-        "chmod 755 /etc/init.d/rayhunter_daemon",
+        "chmod 755 /etc/init.d/raycanary_daemon",
         "exit code 0",
         true,
     )
@@ -96,7 +96,7 @@ async fn run_install(admin_ip: String, admin_password: String) -> Result<()> {
 
     println!();
     println!("Note: by default the TMOHS1 shuts off Wi-Fi after 10 minutes with no clients,");
-    println!("which blocks remote access to Rayhunter until you power cycle. To keep");
+    println!("which blocks remote access to RayCanary until you power cycle. To keep");
     println!("Wi-Fi always on, open http://{admin_ip}/ -> Settings -> Sleep and set");
     println!("Wi-Fi Standby to \"Always on\". See doc/tmobile-tmohs1.md for steps.");
 

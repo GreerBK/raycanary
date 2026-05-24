@@ -1,6 +1,6 @@
-# To use: navigate on Github to Actions, select "Release rayhunter" on the left, click "Run workflow" > "Run workflow" on the right.
-# https://github.com/EFForg/rayhunter/actions/workflows/release.yml
-name: Release rayhunter
+# To use: navigate on Github to Actions, select "Release raycanary" on the left, click "Run workflow" > "Run workflow" on the right.
+# https://github.com/GreerBK/raycanary/actions/workflows/release.yml
+name: Release raycanary
 on:
   workflow_dispatch:
 
@@ -49,4 +49,4 @@ jobs:
       - name: Create release
         run: |
           version=$(grep ^version lib/Cargo.toml | cut -d' ' -f3 | tr -d '"')
-          gh release create --generate-notes -t "Rayhunter v$version" "v$version" rayhunter-v${version}-*/rayhunter-v${version}*.zi*
+          gh release create --generate-notes -t "RayCanary v$version" "v$version" raycanary-v${version}-*/raycanary-v${version}*.zi*

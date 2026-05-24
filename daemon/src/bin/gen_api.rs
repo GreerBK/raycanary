@@ -1,7 +1,7 @@
 use std::{env, fs};
 
 fn main() {
-    let content = rayhunter_daemon::ApiDocs::generate();
+    let content = raycanary_daemon::ApiDocs::generate();
     let mut filename = "openapi.json".to_string();
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 {

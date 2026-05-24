@@ -1,29 +1,29 @@
 # Re-analyzing recordings
 
-Every once in a while, Rayhunter refines its heuristics to detect more kinds of
+Every once in a while, RayCanary refines its heuristics to detect more kinds of
 suspicious behavior, and to reduce noise from incorrect alerts.
 
 This means that your old green recordings may actually contain data that is now
 deemed suspicious, and also old red recordings may become green.
 
-You can re-analyze any old recording inside of Rayhunter by clicking on "N
+You can re-analyze any old recording inside of RayCanary by clicking on "N
 warnings" to expand details, then clicking the "re-analyze" button.
 
 ## Analyzing recordings on Desktop
 
-If you have a PCAP or QMDL file but no rayhunter, you can analyze it on desktop
-using the `rayhunter-check` CLI tool. That tool contains the same heuristics as
-Rayhunter and will also work on traffic data captured with other tools, such as
+If you have a PCAP or QMDL file but no raycanary, you can analyze it on desktop
+using the `raycanary-check` CLI tool. That tool contains the same heuristics as
+RayCanary and will also work on traffic data captured with other tools, such as
 QCSuper.
 
-Since 0.6.1, `rayhunter-check` is included in the release zipfile.
+Since 0.6.1, `raycanary-check` is included in the release zipfile.
 
-You can build `rayhunter-check` from source with the following command:
-`cargo build --bin rayhunter-check` 
+You can build `raycanary-check` from source with the following command:
+`cargo build --bin raycanary-check` 
 
 ## Usage
 ```sh
-rayhunter-check [OPTIONS] --path <PATH>
+raycanary-check [OPTIONS] --path <PATH>
 
 Options:
   -p, --path <PATH>   Path to the PCAP, or QMDL file. If given a directory will 
@@ -36,10 +36,10 @@ Options:
   -V, --version       Print version
 ```
 ### Examples 
-`rayhunter-check -p ~/Downloads/myfile.qmdl`
+`raycanary-check -p ~/Downloads/myfile.qmdl`
 
-`rayhunter-check -p ~/Downloads/myfile.pcap`
+`raycanary-check -p ~/Downloads/myfile.pcap`
 
-`rayhunter-check -p ~/Downloads #Check all files in downloads`
+`raycanary-check -p ~/Downloads #Check all files in downloads`
 
-`rayhunter-check -d -p ~/Downloads/myfile.qmdl #run in debug mode`
+`raycanary-check -d -p ~/Downloads/myfile.qmdl #run in debug mode`

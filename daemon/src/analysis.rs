@@ -8,9 +8,9 @@ use axum::{
 };
 use futures::TryStreamExt;
 use log::{error, info};
-use rayhunter::analysis::analyzer::{AnalyzerConfig, EventType, Harness};
-use rayhunter::diag::{DataType, MessagesContainer};
-use rayhunter::qmdl::QmdlReader;
+use raycanary::analysis::analyzer::{AnalyzerConfig, EventType, Harness};
+use raycanary::diag::{DataType, MessagesContainer};
+use raycanary::qmdl::QmdlReader;
 use serde::Serialize;
 use tokio::fs::File;
 use tokio::io::{AsyncWriteExt, BufWriter};
@@ -27,7 +27,7 @@ pub struct AnalysisWriter {
 }
 
 // We write our analysis results to a file immediately to minimize the amount of
-// state Rayhunter has to keep track of in memory. The analysis file's format is
+// state RayCanary has to keep track of in memory. The analysis file's format is
 // Newline Delimited JSON
 // (https://docs.mulesoft.com/dataweave/latest/dataweave-formats-ndjson), which
 // lets us simply append new rows to the end without parsing the entire JSON

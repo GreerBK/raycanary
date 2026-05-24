@@ -1,14 +1,14 @@
 # Installing from source
 
-Building Rayhunter from source, either for development or otherwise, involves a
+Building RayCanary from source, either for development or otherwise, involves a
 number of external dependencies. Unless you need to do this, we recommend you
-use our [compiled builds](https://github.com/EFForg/rayhunter/releases).
+use our [compiled builds](https://github.com/GreerBK/raycanary/releases).
 
 At a high level, we have:
 
 * A JS frontend written in SvelteKit (`./daemon/web/`)
-* A Rust binary `rayhunter-daemon` (`./daemon/`) that runs on the device, and bundles the frontend.
-* A Rust binary `installer` (`./installer`) that runs on the computer and bundles `rayhunter-daemon`.
+* A Rust binary `raycanary-daemon` (`./daemon/`) that runs on the device, and bundles the frontend.
+* A Rust binary `installer` (`./installer`) that runs on the computer and bundles `raycanary-daemon`.
 
 It's recommended to work either on Mac/Linux, or WSL on Windows.
 
@@ -29,7 +29,7 @@ Then you can build everything with:
 
 ## Running the daemon on your PC
 
-If you don't have a target device handy, you can run `rayhunter-daemon` on your
+If you don't have a target device handy, you can run `raycanary-daemon` on your
 PC with `debug_mode = true`. This skips DIAG, the device display, key input,
 the battery worker, and the WiFi client, so recording-related endpoints will
 not work, but the frontend and read-only APIs do.
@@ -41,7 +41,7 @@ qmdl_store_path = "./qmdl"
 port = 8080
 debug_mode = true
 EOF
-cargo run -p rayhunter-daemon -- ./config.toml
+cargo run -p raycanary-daemon -- ./config.toml
 ```
 
 Open `http://127.0.0.1:8080`.
@@ -56,7 +56,7 @@ continue running on your target device:
 ```sh
 cd daemon/web
 
-# Assumes rayhunter-daemon is listening on localhost:8080
+# Assumes raycanary-daemon is listening on localhost:8080
 npm run dev
 
 # Use a custom target IP:port where the backend runs

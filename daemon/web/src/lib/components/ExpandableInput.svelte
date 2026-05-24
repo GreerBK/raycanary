@@ -50,7 +50,7 @@
         type="checkbox"
         checked={expanded}
         onchange={handle_checkbox_change}
-        class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+        class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
     />
     <label for={checkboxId} class="ml-2 block text-sm text-gray-700">
         {label}
@@ -69,7 +69,7 @@
             bind:value
             onblur={handle_input_blur}
             placeholder={inputPlaceholder}
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
         />
         {#if inputHelp}
             <p class="text-xs text-gray-500 mt-1">

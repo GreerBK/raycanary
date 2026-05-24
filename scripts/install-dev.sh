@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install a development build of Rayhunter to a device.
+# Install a development build of RayCanary to a device.
 # Run ./scripts/build-dev.sh first.
 #
 # Usage: ./scripts/install-dev.sh <device> [options...]

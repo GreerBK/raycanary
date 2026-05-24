@@ -28,7 +28,7 @@ mod wingtech;
 use crate::output::eprintln;
 
 static CONFIG_TOML: &str = include_str!("../../dist/config.toml.in");
-static RAYHUNTER_DAEMON_INIT: &str = include_str!("../../dist/scripts/rayhunter_daemon");
+static RAYCANARY_DAEMON_INIT: &str = include_str!("../../dist/scripts/raycanary_daemon");
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -41,25 +41,25 @@ struct Args {
 // of the manufacturer's capitalisation.
 #[derive(Subcommand, Debug)]
 enum Command {
-    /// Install rayhunter on the Orbic RC400L using the legacy USB+ADB-based installer.
+    /// Install raycanary on the Orbic RC400L using the legacy USB+ADB-based installer.
     #[cfg(not(target_os = "android"))]
     OrbicUsb(InstallOrbic),
-    /// Install rayhunter on the Orbic RC400L via network.
+    /// Install raycanary on the Orbic RC400L via network.
     #[clap(alias = "orbic-network")]
     Orbic(OrbicNetworkArgs),
-    /// Install rayhunter on the Moxee Hotspot via network.
+    /// Install raycanary on the Moxee Hotspot via network.
     Moxee(MoxeeArgs),
-    /// Install rayhunter on the TMobile TMOHS1.
+    /// Install raycanary on the TMobile TMOHS1.
     Tmobile(TmobileArgs),
-    /// Install rayhunter on the Uz801.
+    /// Install raycanary on the Uz801.
     #[cfg(not(target_os = "android"))]
     Uz801(Uz801Args),
-    /// Install rayhunter on a PinePhone's Quectel modem.
+    /// Install raycanary on a PinePhone's Quectel modem.
     #[cfg(not(target_os = "android"))]
     Pinephone(InstallPinephone),
-    /// Install rayhunter on the TP-Link M7350.
+    /// Install raycanary on the TP-Link M7350.
     Tplink(InstallTpLink),
-    /// Install rayhunter on the Wingtech CT2MHS01.
+    /// Install raycanary on the Wingtech CT2MHS01.
     Wingtech(WingtechArgs),
     /// Developer utilities.
     Util(Util),
@@ -91,9 +91,9 @@ struct InstallTpLink {
     #[arg(long)]
     reset_config: bool,
 
-    /// Override the data directory path. Defaults to /cache/rayhunter-data (or SD card path when
-    /// SD card is used). Must not be /data/rayhunter, which lives on a storage partition that's
-    ///  too small for normal Rayhunter operation.
+    /// Override the data directory path. Defaults to /cache/raycanary-data (or SD card path when
+    /// SD card is used). Must not be /data/raycanary, which lives on a storage partition that's
+    ///  too small for normal RayCanary operation.
     #[arg(long)]
     data_dir: Option<String>,
 }
@@ -123,8 +123,8 @@ struct OrbicNetworkArgs {
     #[arg(long)]
     reset_config: bool,
 
-    /// Override the data directory path. Defaults to /data/rayhunter-data.
-    /// Must not be /data/rayhunter.
+    /// Override the data directory path. Defaults to /data/raycanary-data.
+    /// Must not be /data/raycanary.
     #[arg(long)]
     data_dir: Option<String>,
 }
@@ -147,8 +147,8 @@ struct MoxeeArgs {
     #[arg(long)]
     reset_config: bool,
 
-    /// Override the data directory path. Defaults to /cache/rayhunter-data.
-    /// Must not be /data/rayhunter.
+    /// Override the data directory path. Defaults to /cache/raycanary-data.
+    /// Must not be /data/raycanary.
     #[arg(long)]
     data_dir: Option<String>,
 }
@@ -277,18 +277,18 @@ async fn run(args: Args) -> Result<(), Error> {
     env_logger::Builder::from_env(Env::default().default_filter_or("off")).init();
 
     match args.command {
-        Command::Tmobile(args) => tmobile::install(args).await.context("Failed to install rayhunter on the Tmobile TMOHS1. Make sure your computer is connected to the hotspot using USB tethering or WiFi.")?,
+        Command::Tmobile(args) => tmobile::install(args).await.context("Failed to install raycanary on the Tmobile TMOHS1. Make sure your computer is connected to the hotspot using USB tethering or WiFi.")?,
         #[cfg(not(target_os = "android"))]
-        Command::Uz801(args) => uz801::install(args).await.context("Failed to install rayhunter on the Uz801. Make sure your computer is connected to the hotspot using USB.")?,
-        Command::Tplink(tplink) => tplink::main_tplink(tplink).await.context("Failed to install rayhunter on the TP-Link M7350. Make sure your computer is connected to the hotspot using USB tethering or WiFi.")?,
+        Command::Uz801(args) => uz801::install(args).await.context("Failed to install raycanary on the Uz801. Make sure your computer is connected to the hotspot using USB.")?,
+        Command::Tplink(tplink) => tplink::main_tplink(tplink).await.context("Failed to install raycanary on the TP-Link M7350. Make sure your computer is connected to the hotspot using USB tethering or WiFi.")?,
         #[cfg(not(target_os = "android"))]
         Command::Pinephone(_) => pinephone::install().await
-            .context("Failed to install rayhunter on the Pinephone's Quectel modem")?,
+            .context("Failed to install raycanary on the Pinephone's Quectel modem")?,
         #[cfg(not(target_os = "android"))]
-        Command::OrbicUsb(args) => orbic::install(args.reset_config).await.context("\nFailed to install rayhunter on the Orbic RC400L (USB installer)")?,
-        Command::Orbic(args) => orbic_network::install(args.admin_ip, args.admin_username, args.admin_password, args.reset_config, args.data_dir).await.context("\nFailed to install rayhunter on the Orbic RC400L")?,
-        Command::Moxee(args) => moxee::install(args).await.context("\nFailed to install rayhunter on the Moxee Hotspot")?,
-        Command::Wingtech(args) => wingtech::install(args).await.context("\nFailed to install rayhunter on the Wingtech CT2MHS01")?,
+        Command::OrbicUsb(args) => orbic::install(args.reset_config).await.context("\nFailed to install raycanary on the Orbic RC400L (USB installer)")?,
+        Command::Orbic(args) => orbic_network::install(args.admin_ip, args.admin_username, args.admin_password, args.reset_config, args.data_dir).await.context("\nFailed to install raycanary on the Orbic RC400L")?,
+        Command::Moxee(args) => moxee::install(args).await.context("\nFailed to install raycanary on the Moxee Hotspot")?,
+        Command::Wingtech(args) => wingtech::install(args).await.context("\nFailed to install raycanary on the Wingtech CT2MHS01")?,
         Command::Util(subcommand) => {
             match subcommand.command {
             #[cfg(not(target_os = "android"))]

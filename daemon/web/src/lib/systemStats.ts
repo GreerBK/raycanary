@@ -6,7 +6,7 @@ export interface SystemStats {
 }
 
 export interface RuntimeMetadata {
-    rayhunter_version: string;
+    raycanary_version: string;
     system_os: string;
     arch: string;
 }

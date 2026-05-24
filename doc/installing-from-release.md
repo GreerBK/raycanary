@@ -1,9 +1,9 @@
 # Installing from the latest release
 
-Make sure you've got one of Rayhunter's [supported devices](./supported-devices.md). These instructions have only been tested on macOS and Ubuntu 24.04. If they fail, you will need to [install Rayhunter from source](./installing-from-source.md).
+Make sure you've got one of RayCanary's [supported devices](./supported-devices.md). These instructions have only been tested on macOS and Ubuntu 24.04. If they fail, you will need to [install RayCanary from source](./installing-from-source.md).
 
 1. **For the TP-Link only,** insert a FAT-formatted SD card. This will be used to store all recordings.
-2. Download the latest `rayhunter-vX.X.X-PLATFORM.zip` from the [Rayhunter releases page](https://github.com/EFForg/rayhunter/releases) for your platform:
+2. Download the latest `raycanary-vX.X.X-PLATFORM.zip` from the [RayCanary releases page](https://github.com/GreerBK/raycanary/releases) for your platform:
     - for Linux on x64 architecture: `linux-x64`
     - for Linux on ARM64 architecture: `linux-aarch64`
     - for Linux on armv7/v8 (32-bit) architecture: `linux-armv7`
@@ -11,11 +11,11 @@ Make sure you've got one of Rayhunter's [supported devices](./supported-devices.
     - for MacOS on ARM (M1/M2 etc.) architecture: `macos-arm`
     - for Windows: `windows-x86_64`
 
-3. Decompress the `rayhunter-vX.X.X-PLATFORM.zip` archive. Open the terminal and navigate to the folder. (Be sure to replace X.X.X with the correct version number!)
+3. Decompress the `raycanary-vX.X.X-PLATFORM.zip` archive. Open the terminal and navigate to the folder. (Be sure to replace X.X.X with the correct version number!)
 
     ```bash
-    unzip ~/Downloads/rayhunter-vX.X.X-PLATFORM.zip
-    cd ~/Downloads/rayhunter-vX.X.X-PLATFORM
+    unzip ~/Downloads/raycanary-vX.X.X-PLATFORM.zip
+    cd ~/Downloads/raycanary-vX.X.X-PLATFORM
     ```
 
    On Windows you can decompress using the file browser, then navigate to the
@@ -59,11 +59,11 @@ Make sure you've got one of Rayhunter's [supported devices](./supported-devices.
 
 7. The installer will eventually tell you it's done, and the device will reboot.
 
-8. Rayhunter should now be running! You can verify this by [viewing Rayhunter's web UI](./using-rayhunter.md). You should also see a green line flash along the top of top the display on the device.
+8. RayCanary should now be running! You can verify this by [viewing RayCanary's web UI](./using-raycanary.md). You should also see a green line flash along the top of top the display on the device.
 
 ## Troubleshooting
 
-* If you are having trouble installing Rayhunter and you're connecting to your device over USB, try using a different USB cable to connect the device to your computer. If you are using a USB hub, try using a different one or directly connecting the device to a USB port on your computer. A faulty USB connection can cause the Rayhunter installer to fail.
+* If you are having trouble installing RayCanary and you're connecting to your device over USB, try using a different USB cable to connect the device to your computer. If you are using a USB hub, try using a different one or directly connecting the device to a USB port on your computer. A faulty USB connection can cause the RayCanary installer to fail.
 
 * You can test your device by enabling the test heuristic. This will be very noisy and fire an alert every time you see a new tower. Be sure to turn it off when you are done testing.  
 

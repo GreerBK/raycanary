@@ -10,7 +10,7 @@ use axum::http::header::CONTENT_TYPE;
 use axum::response::{IntoResponse, Response};
 use futures::{StreamExt, TryStreamExt, future};
 use log::{debug, error, info, warn};
-use rayhunter::Device;
+use raycanary::Device;
 use tokio::fs::File;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
@@ -21,11 +21,11 @@ use tokio_stream::wrappers::LinesStream;
 use tokio_util::task::TaskTracker;
 
 #[cfg(feature = "apidocs")]
-use rayhunter::analysis::analyzer::ReportMetadata;
-use rayhunter::analysis::analyzer::{AnalysisLineNormalizer, AnalyzerConfig, EventType};
-use rayhunter::diag::{DataType, Message, MessagesContainer};
-use rayhunter::diag_device::DiagDevice;
-use rayhunter::qmdl::QmdlWriter;
+use raycanary::analysis::analyzer::ReportMetadata;
+use raycanary::analysis::analyzer::{AnalysisLineNormalizer, AnalyzerConfig, EventType};
+use raycanary::diag::{DataType, Message, MessagesContainer};
+use raycanary::diag_device::DiagDevice;
+use raycanary::qmdl::QmdlWriter;
 
 use crate::analysis::{AnalysisCtrlMessage, AnalysisWriter};
 use crate::config::GpsMode;
@@ -33,6 +33,7 @@ use crate::display;
 use crate::notifications::{Notification, NotificationType};
 use crate::qmdl_store::{RecordingStore, RecordingStoreError};
 use crate::server::ServerState;
+use crate::speaker::SpeakerCommand;
 use crate::stats::DiskStats;
 
 const DISK_CHECK_BYTES_INTERVAL: usize = 256 * 1024;
@@ -61,6 +62,7 @@ pub struct DiagTask {
     analysis_sender: Sender<AnalysisCtrlMessage>,
     analyzer_config: AnalyzerConfig,
     notification_channel: tokio::sync::mpsc::Sender<Notification>,
+    speaker_channel: tokio::sync::mpsc::Sender<SpeakerCommand>,
     min_space_to_start_mb: u64,
     min_space_to_continue_mb: u64,
     gps_mode: GpsMode,
@@ -113,6 +115,7 @@ impl DiagTask {
         analysis_sender: Sender<AnalysisCtrlMessage>,
         analyzer_config: AnalyzerConfig,
         notification_channel: tokio::sync::mpsc::Sender<Notification>,
+        speaker_channel: tokio::sync::mpsc::Sender<SpeakerCommand>,
         min_space_to_start_mb: u64,
         min_space_to_continue_mb: u64,
         gps_mode: GpsMode,
@@ -123,6 +126,7 @@ impl DiagTask {
             analysis_sender,
             analyzer_config,
             notification_channel,
+            speaker_channel,
             min_space_to_start_mb,
             min_space_to_continue_mb,
             gps_mode,
@@ -174,7 +178,7 @@ impl DiagTask {
 
             let record = GpsRecord {
                 latest_packet_timestamp: None,
-                system_time: rayhunter::clock::get_adjusted_now().timestamp(),
+                system_time: raycanary::clock::get_adjusted_now().timestamp(),
                 lat,
                 lon,
             };
@@ -282,7 +286,7 @@ impl DiagTask {
         };
         let record = GpsRecord {
             latest_packet_timestamp: self.latest_packet_timestamp,
-            system_time: rayhunter::clock::get_adjusted_now().timestamp(),
+            system_time: raycanary::clock::get_adjusted_now().timestamp(),
             lat,
             lon,
         };
@@ -420,11 +424,18 @@ impl DiagTask {
                 self.notification_channel
                     .send(Notification::new(
                         NotificationType::Warning,
-                        format!("Rayhunter has detected a {:?} severity event", max_type),
+                        format!("RayCanary has detected a {:?} severity event", max_type),
                         Some(Duration::from_secs(60 * 5)),
                     ))
                     .await
                     .expect("Failed to send to notification channel");
+                // Best-effort: drop the speaker event if the worker is shutting down or its
+                // channel is full. Detection should never be blocked on audio playback. We
+                // log at warn! so an operator notices if a busy site is silently dropping
+                // alerts because the channel is full or the worker is wedged.
+                if let Err(e) = self.speaker_channel.try_send(SpeakerCommand::Alert(max_type)) {
+                    warn!("speaker channel send skipped: {e}");
+                }
             }
 
             if max_type > self.max_type_seen {
@@ -455,6 +466,7 @@ pub fn run_diag_read_thread(
     analysis_sender: Sender<AnalysisCtrlMessage>,
     analyzer_config: AnalyzerConfig,
     notification_channel: tokio::sync::mpsc::Sender<Notification>,
+    speaker_channel: tokio::sync::mpsc::Sender<SpeakerCommand>,
     min_space_to_start_mb: u64,
     min_space_to_continue_mb: u64,
     gps_mode: GpsMode,
@@ -473,6 +485,7 @@ pub fn run_diag_read_thread(
             analysis_sender,
             analyzer_config,
             notification_channel,
+            speaker_channel,
             min_space_to_start_mb,
             min_space_to_continue_mb,
             gps_mode,

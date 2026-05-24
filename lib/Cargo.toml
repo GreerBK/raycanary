@@ -1,11 +1,11 @@
 [package]
-name = "rayhunter"
+name = "raycanary"
 version = "0.11.1"
 edition = "2024"
-description = "Realtime cellular data decoding and analysis for IMSI catcher detection"
+description = "Realtime cellular data decoding and analysis for IMSI catcher detection, with audible alerts and extended battery support"
 
 [lib]
-name = "rayhunter"
+name = "raycanary"
 path = "src/lib.rs"
 
 [features]

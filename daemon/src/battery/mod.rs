@@ -1,13 +1,13 @@
 use std::{path::Path, time::Duration};
 
 use log::{info, warn};
-use rayhunter::Device;
+use raycanary::Device;
 use serde::Serialize;
 use tokio::select;
 use tokio_util::{sync::CancellationToken, task::TaskTracker};
 
 use crate::{
-    error::RayhunterError,
+    error::RaycanaryError,
     notifications::{Notification, NotificationType},
 };
 
@@ -23,40 +23,40 @@ const LOW_BATTERY_LEVEL: u8 = 10;
 #[cfg_attr(feature = "apidocs", derive(utoipa::ToSchema))]
 pub struct BatteryState {
     /// The current level in percentage of the device battery
-    level: u8,
+    pub level: u8,
     /// A boolean indicating whether the battery is currently being charged
-    is_plugged_in: bool,
+    pub is_plugged_in: bool,
 }
 
-async fn is_plugged_in_from_file(path: &Path) -> Result<bool, RayhunterError> {
+async fn is_plugged_in_from_file(path: &Path) -> Result<bool, RaycanaryError> {
     match tokio::fs::read_to_string(path)
         .await
-        .map_err(RayhunterError::TokioError)?
+        .map_err(RaycanaryError::TokioError)?
         .chars()
         .next()
     {
         Some('0') => Ok(false),
         Some('1') => Ok(true),
-        _ => Err(RayhunterError::BatteryPluggedInStatusParseError),
+        _ => Err(RaycanaryError::BatteryPluggedInStatusParseError),
     }
 }
 
-async fn get_level_from_percentage_file(path: &Path) -> Result<u8, RayhunterError> {
+async fn get_level_from_percentage_file(path: &Path) -> Result<u8, RaycanaryError> {
     tokio::fs::read_to_string(path)
         .await
-        .map_err(RayhunterError::TokioError)?
+        .map_err(RaycanaryError::TokioError)?
         .trim_end()
         .parse()
-        .or(Err(RayhunterError::BatteryLevelParseError))
+        .or(Err(RaycanaryError::BatteryLevelParseError))
 }
 
-pub async fn get_battery_status(device: &Device) -> Result<BatteryState, RayhunterError> {
+pub async fn get_battery_status(device: &Device) -> Result<BatteryState, RaycanaryError> {
     Ok(match device {
         Device::Orbic => orbic::get_battery_state().await?,
         Device::Wingtech => wingtech::get_battery_state().await?,
         Device::Tmobile => tmobile::get_battery_state().await?,
         Device::Tplink => tplink::get_battery_state().await?,
-        _ => return Err(RayhunterError::FunctionNotSupportedForDeviceError),
+        _ => return Err(RaycanaryError::FunctionNotSupportedForDeviceError),
     })
 }
 
@@ -69,7 +69,7 @@ pub fn run_battery_notification_worker(
     task_tracker.spawn(async move {
         // Don't send a notification initially if the device starts at a low battery level.
         let mut triggered = match get_battery_status(&device).await {
-            Err(RayhunterError::FunctionNotSupportedForDeviceError) => {
+            Err(RaycanaryError::FunctionNotSupportedForDeviceError) => {
                 info!("Battery status not supported for this device, disabling battery notifications");
                 return;
             }
@@ -87,7 +87,7 @@ pub fn run_battery_notification_worker(
             }
 
             let status = match get_battery_status(&device).await {
-                Err(RayhunterError::FunctionNotSupportedForDeviceError) => {
+                Err(RaycanaryError::FunctionNotSupportedForDeviceError) => {
                     info!("Battery status not supported for this device, disabling battery notifications");
                     break;
                 }
@@ -109,7 +109,7 @@ pub fn run_battery_notification_worker(
                 notification_channel
                     .send(Notification::new(
                         NotificationType::LowBattery,
-                        "Rayhunter's battery is low".to_string(),
+                        "RayCanary's battery is low".to_string(),
                         None,
                     ))
                     .await

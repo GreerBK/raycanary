@@ -3,6 +3,7 @@
         get_config,
         set_config,
         test_notification,
+        test_speaker,
         get_wifi_status,
         scan_wifi_networks,
         GpsMode,
@@ -19,10 +20,13 @@
     let loading = $state(false);
     let saving = $state(false);
     let testingNotification = $state(false);
+    let testingSpeaker = $state(false);
     let message = $state('');
     let messageType = $state<'success' | 'error' | null>(null);
     let testMessage = $state('');
     let testMessageType = $state<'success' | 'error' | null>(null);
+    let speakerTestMessage = $state('');
+    let speakerTestMessageType = $state<'success' | 'error' | null>(null);
     let wifiStatus = $state<WifiStatus | null>(null);
     let wifiStatusTimer = $state<ReturnType<typeof setInterval> | null>(null);
     let scanning = $state(false);
@@ -61,7 +65,7 @@
             saving = true;
             await set_config(config);
             message =
-                'Config saved successfully! Rayhunter is restarting now. Reload the page in a few seconds.';
+                'Config saved successfully! RayCanary is restarting now. Reload the page in a few seconds.';
             messageType = 'success';
         } catch (error) {
             message = `Failed to save config: ${error}`;
@@ -130,6 +134,23 @@
         }
     }
 
+    async function send_test_speaker() {
+        try {
+            testingSpeaker = true;
+            speakerTestMessage = '';
+            speakerTestMessageType = null;
+            await test_speaker();
+            speakerTestMessage =
+                'Speaker test queued. Did you hear it? If not, check the daemon log.';
+            speakerTestMessageType = 'success';
+        } catch (error) {
+            speakerTestMessage = `${error}`;
+            speakerTestMessageType = 'error';
+        } finally {
+            testingSpeaker = false;
+        }
+    }
+
     $effect(() => {
         if (shown && !config) {
             load_config();
@@ -166,7 +187,7 @@
                     <select
                         id="ui_level"
                         bind:value={config.ui_level}
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                     >
                         <option value={0}>Invisible mode</option>
                         <option value={1}>Subtle mode (colored line)</option>
@@ -175,7 +196,7 @@
                         <option value={4}>High visibility (full screen color)</option>
                     </select>
                     <p class="text-xs text-gray-500 mt-1">
-                        Note: Rayhunter draws over the device's native UI, so some flickering is
+                        Note: RayCanary draws over the device's native UI, so some flickering is
                         expected
                     </p>
                 </div>
@@ -190,7 +211,7 @@
                     <select
                         id="key_input_mode"
                         bind:value={config.key_input_mode}
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                     >
                         <option value={0}>Disable button control</option>
                         <option value={1}>Double-tap power button to start new recording</option>
@@ -203,7 +224,7 @@
                             id="colorblind_mode"
                             type="checkbox"
                             bind:checked={config.colorblind_mode}
-                            class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                            class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                         />
                         <label for="colorblind_mode" class="ml-2 block text-sm text-gray-700">
                             Colorblind Mode
@@ -220,7 +241,7 @@
                         inputId="ntfy_url"
                         label="Enable ntfy notifications"
                         inputLabel="ntfy URL"
-                        inputPlaceholder="https://ntfy.sh/my-rayhunter"
+                        inputPlaceholder="https://ntfy.sh/my-raycanary"
                         inputHelp="Test button below uses the saved configuration URL, not the input above"
                     >
                         <div>
@@ -228,7 +249,7 @@
                                 type="button"
                                 onclick={send_test_notification}
                                 disabled={testingNotification}
-                                class="bg-rayhunter-blue hover:bg-rayhunter-dark-blue disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md flex flex-row gap-1 items-center"
+                                class="bg-raycanary-blue hover:bg-raycanary-dark-blue disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md flex flex-row gap-1 items-center"
                             >
                                 {#if testingNotification}
                                     <div
@@ -300,6 +321,110 @@
                 </div>
 
                 <div class="border-t border-gray-200 pt-4 mt-6 space-y-3">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Speaker (Audible Alerts)</h3>
+                    <p class="text-xs text-red-600 font-semibold">
+                        ⚠️ The command below is executed as root by `sh -c`. Anyone who can reach
+                        this page can set it to arbitrary shell code. Treat your Wi-Fi password as
+                        a root credential for the device.
+                    </p>
+
+                    <div class="flex items-center">
+                        <input
+                            id="speaker_enabled"
+                            type="checkbox"
+                            bind:checked={config.speaker.enabled}
+                            class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
+                        />
+                        <label for="speaker_enabled" class="ml-2 block text-sm text-gray-700">
+                            Enable speaker
+                        </label>
+                    </div>
+
+                    <div>
+                        <label
+                            for="speaker_command"
+                            class="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Shell command
+                        </label>
+                        <input
+                            id="speaker_command"
+                            type="text"
+                            bind:value={config.speaker.command}
+                            placeholder="aplay /data/raycanary/alert.wav"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md font-mono text-sm focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Run on each qualifying detection. Test button below uses the
+                            <em>saved</em> command, not what's typed here.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label
+                                for="speaker_min_severity"
+                                class="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Minimum severity
+                            </label>
+                            <select
+                                id="speaker_min_severity"
+                                bind:value={config.speaker.min_severity}
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
+                            >
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                for="speaker_debounce_secs"
+                                class="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                                Debounce (seconds)
+                            </label>
+                            <input
+                                id="speaker_debounce_secs"
+                                type="number"
+                                min="0"
+                                bind:value={config.speaker.debounce_secs}
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <button
+                            type="button"
+                            onclick={send_test_speaker}
+                            disabled={testingSpeaker}
+                            class="bg-raycanary-blue hover:bg-raycanary-dark-blue disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-md flex flex-row gap-1 items-center"
+                        >
+                            {#if testingSpeaker}
+                                <div
+                                    class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                                ></div>
+                                Sending...
+                            {:else}
+                                Test Speaker
+                            {/if}
+                        </button>
+                        {#if speakerTestMessage}
+                            <div
+                                class="mt-2 p-2 rounded-sm text-sm {speakerTestMessageType ===
+                                'error'
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-green-100 text-green-700'}"
+                            >
+                                {speakerTestMessage}
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-4 mt-6 space-y-3">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Storage Management</h3>
 
                     <div>
@@ -314,7 +439,7 @@
                             type="number"
                             min="1"
                             bind:value={config.min_space_to_start_recording_mb}
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                         />
                         <p class="text-xs text-gray-500 mt-1">
                             Recording will not start if less than this amount of disk space is free
@@ -333,7 +458,7 @@
                             type="number"
                             min="1"
                             bind:value={config.min_space_to_continue_recording_mb}
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                         />
                         <p class="text-xs text-gray-500 mt-1">
                             Recording will stop automatically if disk space drops below this level
@@ -354,7 +479,7 @@
                         inputId="webdav_url"
                         label="Enable WebDAV upload"
                         inputLabel="Server URL"
-                        inputPlaceholder="https://dav.example.com/rayhunter/"
+                        inputPlaceholder="https://dav.example.com/raycanary/"
                         inputHelp="Files are uploaded via HTTP PUT under this base URL. No folders are created, and folders in this base URL are assumed to exist already."
                     >
                         <div>
@@ -368,7 +493,7 @@
                                 id="webdav_username"
                                 type="text"
                                 bind:value={config.webdav.username}
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">
                                 Optional. Leave blank for unauthenticated uploads.
@@ -386,7 +511,7 @@
                                 id="webdav_password"
                                 type="password"
                                 bind:value={config.webdav.password}
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">
                                 A password without a username will be rejected and the request will
@@ -406,7 +531,7 @@
                                 type="number"
                                 min="1"
                                 bind:value={config.webdav.upload_timeout_secs}
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                             />
                         </div>
 
@@ -422,7 +547,7 @@
                                 type="number"
                                 min="1"
                                 bind:value={config.webdav.poll_interval_secs}
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">
                                 How often the worker checks for new entries to upload.
@@ -441,7 +566,7 @@
                                 type="number"
                                 min="0"
                                 bind:value={config.webdav.min_age_secs}
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">
                                 How long a recording must be closed before it becomes eligible for
@@ -454,7 +579,7 @@
                                 id="webdav_delete_on_upload"
                                 type="checkbox"
                                 bind:checked={config.webdav.delete_on_upload}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label
                                 for="webdav_delete_on_upload"
@@ -484,7 +609,7 @@
                                 id="wifi_enabled"
                                 type="checkbox"
                                 bind:checked={config.wifi_enabled}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label for="wifi_enabled" class="ml-2 block text-sm text-gray-700">
                                 Enable WiFi
@@ -527,7 +652,7 @@
                                     type="text"
                                     bind:value={config.wifi_ssid}
                                     placeholder="MyWiFiNetwork"
-                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                                 />
                                 <button
                                     type="button"
@@ -574,7 +699,7 @@
                                 <select
                                     id="wifi_security"
                                     bind:value={config.wifi_security}
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                                 >
                                     <option value="wpa_psk">WPA2 (WPA-PSK)</option>
                                     <option value="sae">WPA3 (SAE)</option>
@@ -594,7 +719,7 @@
                                 type="password"
                                 bind:value={config.wifi_password}
                                 placeholder="Enter password"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">
                                 Changing the network requires re-entering the password.
@@ -614,7 +739,7 @@
                                     type="text"
                                     bind:value={dnsServersInput}
                                     placeholder="9.9.9.9, 149.112.112.112"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-rayhunter-blue"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-raycanary-blue"
                                 />
                                 <p class="text-xs text-gray-500 mt-1">
                                     Comma-separated. Used when WiFi is active. Defaults to 9.9.9.9,
@@ -635,7 +760,7 @@
                                 id="imsi_requested"
                                 type="checkbox"
                                 bind:checked={config.analyzers.imsi_requested}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label for="imsi_requested" class="ml-2 block text-sm text-gray-700">
                                 IMSI Requested Heuristic
@@ -647,7 +772,7 @@
                                 id="connection_redirect_2g_downgrade"
                                 type="checkbox"
                                 bind:checked={config.analyzers.connection_redirect_2g_downgrade}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label
                                 for="connection_redirect_2g_downgrade"
@@ -662,7 +787,7 @@
                                 id="lte_sib6_and_7_downgrade"
                                 type="checkbox"
                                 bind:checked={config.analyzers.lte_sib6_and_7_downgrade}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label
                                 for="lte_sib6_and_7_downgrade"
@@ -677,7 +802,7 @@
                                 id="null_cipher"
                                 type="checkbox"
                                 bind:checked={config.analyzers.null_cipher}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label for="null_cipher" class="ml-2 block text-sm text-gray-700">
                                 Null Cipher Heuristic
@@ -689,7 +814,7 @@
                                 id="nas_null_cipher"
                                 type="checkbox"
                                 bind:checked={config.analyzers.nas_null_cipher}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label for="nas_null_cipher" class="ml-2 block text-sm text-gray-700">
                                 NAS Null Cipher Heuristic
@@ -701,7 +826,7 @@
                                 id="incomplete_sib"
                                 type="checkbox"
                                 bind:checked={config.analyzers.incomplete_sib}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label for="incomplete_sib" class="ml-2 block text-sm text-gray-700">
                                 Incomplete SIB Heuristic
@@ -713,7 +838,7 @@
                                 id="test_analyzer"
                                 type="checkbox"
                                 bind:checked={config.analyzers.test_analyzer}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label for="test_analyzer" class="ml-2 block text-sm text-gray-700">
                                 Test Heuristic (noisy!)
@@ -724,7 +849,7 @@
                                 id="diagnostic_analyzer"
                                 type="checkbox"
                                 bind:checked={config.analyzers.diagnostic_analyzer}
-                                class="h-4 w-4 text-rayhunter-blue focus:ring-rayhunter-blue border-gray-300 rounded-sm"
+                                class="h-4 w-4 text-raycanary-blue focus:ring-raycanary-blue border-gray-300 rounded-sm"
                             />
                             <label
                                 for="diagnostic_analyzer"
@@ -745,7 +870,7 @@
                         <select
                             id="gps_mode"
                             bind:value={config.gps_mode}
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rayhunter-blue"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-raycanary-blue"
                         >
                             <option value={GpsMode.Disabled}>Disabled</option>
                             <option value={GpsMode.Fixed}>Fixed coordinates</option>
@@ -778,7 +903,7 @@
                                 required
                                 bind:value={config.gps_fixed_latitude}
                                 placeholder="e.g. 37.7749"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">Decimal degrees, -90 to 90</p>
                         </div>
@@ -797,7 +922,7 @@
                                 required
                                 bind:value={config.gps_fixed_longitude}
                                 placeholder="e.g. -122.4194"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rayhunter-blue"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-raycanary-blue"
                             />
                             <p class="text-xs text-gray-500 mt-1">Decimal degrees, -180 to 180</p>
                         </div>

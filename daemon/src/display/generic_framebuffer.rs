@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::config::{self, UiLevel};
 use crate::display::DisplayState;
-use rayhunter::analysis::analyzer::EventType;
+use raycanary::analysis::analyzer::EventType;
 
 use log::{error, info};
 use tokio::sync::mpsc::Receiver;

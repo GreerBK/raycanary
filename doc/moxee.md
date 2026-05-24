@@ -1,6 +1,6 @@
 # KonnectONE Moxee Hotspot (K779HSDL)
 
-Supported in Rayhunter since version 0.6.0.
+Supported in RayCanary since version 0.6.0.
 
 The Moxee Hotspot is a device very similar to the Orbic RC400L. It seems to be
 primarily for the US market.
@@ -43,7 +43,7 @@ To get started, follow the [release installation guide](./installing-from-releas
 * On Moxee-brand devices, check under the battery for the password.
 * `./installer moxee` is almost the same as `./installer orbic`, it just comes with slightly better defaults that will give you more space for recordings. 
 
-The Rayhunter UI will be available at <http://192.168.1.1:8080>.
+The RayCanary UI will be available at <http://192.168.1.1:8080>.
 
 <a name=shell></a>
 ## Obtaining a shell

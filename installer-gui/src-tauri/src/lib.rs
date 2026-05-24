@@ -9,7 +9,7 @@ async fn run_installer(app_handle: tauri::AppHandle, args: String) -> anyhow::Re
             Some(Box::new(move |output| {
                 app_handle
                     .emit("installer-output", output)
-                    .expect("Error sending Rayhunter CLI installer output to GUI frontend");
+                    .expect("Error sending RayCanary CLI installer output to GUI frontend");
             })),
         )
     })
@@ -17,7 +17,7 @@ async fn run_installer(app_handle: tauri::AppHandle, args: String) -> anyhow::Re
 }
 
 #[tauri::command]
-async fn install_rayhunter(app_handle: tauri::AppHandle, args: String) -> Result<(), String> {
+async fn install_raycanary(app_handle: tauri::AppHandle, args: String) -> Result<(), String> {
     // the return value of tauri commands needs to be serializable by serde which we accomplish
     // here by converting anyhow::Error to a string
     run_installer(app_handle, args)
@@ -29,7 +29,7 @@ async fn install_rayhunter(app_handle: tauri::AppHandle, args: String) -> Result
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![install_rayhunter])
+        .invoke_handler(tauri::generate_handler![install_raycanary])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -3,7 +3,7 @@ use thiserror::Error;
 use crate::qmdl_store::RecordingStoreError;
 
 #[derive(Error, Debug)]
-pub enum RayhunterError {
+pub enum RaycanaryError {
     #[error("Config file parsing error: {0}")]
     ConfigFileParsingError(#[from] toml::de::Error),
     #[error("Tokio error: {0}")]

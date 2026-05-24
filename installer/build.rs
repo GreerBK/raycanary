@@ -14,7 +14,7 @@ fn main() {
         .join("../target/armv7-unknown-linux-musleabihf")
         .join(&profile);
     set_binary_var(&include_dir, "FILE_ROOTSHELL", "rootshell");
-    set_binary_var(&include_dir, "FILE_RAYHUNTER_DAEMON", "rayhunter-daemon");
+    set_binary_var(&include_dir, "FILE_RAYCANARY_DAEMON", "raycanary-daemon");
 
     let wpa_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../tools/build-wpa-supplicant/out");
     set_binary_var(&wpa_dir, "FILE_WPA_SUPPLICANT", "wpa_supplicant");

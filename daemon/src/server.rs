@@ -22,6 +22,7 @@ use tokio_util::io::ReaderStream;
 use tokio_util::sync::CancellationToken;
 
 use crate::analysis::{AnalysisCtrlMessage, AnalysisStatus};
+use crate::battery::{self, BatteryState};
 use crate::config::{Config, GpsMode};
 use crate::diag::DiagDeviceCtrlMessage;
 use crate::display::DisplayState;
@@ -29,6 +30,7 @@ use crate::gps::GpsData;
 use crate::notifications::DEFAULT_NOTIFICATION_TIMEOUT;
 use crate::pcap::{generate_pcap_data, load_gps_records_for_entry};
 use crate::qmdl_store::RecordingStore;
+use crate::speaker::SpeakerCommand;
 
 pub struct ServerState {
     pub config_path: String,
@@ -39,6 +41,7 @@ pub struct ServerState {
     pub analysis_sender: Sender<AnalysisCtrlMessage>,
     pub daemon_restart_token: CancellationToken,
     pub ui_update_sender: Option<Sender<DisplayState>>,
+    pub speaker_sender: Sender<SpeakerCommand>,
     pub wifi_status: Arc<RwLock<wifi_station::WifiStatus>>,
     pub wifi_scan_lock: tokio::sync::Mutex<()>,
     pub gps_state: Arc<RwLock<Option<GpsData>>>,
@@ -96,14 +99,14 @@ pub async fn serve_static(
     let path = path.trim_start_matches('/');
 
     match path {
-        "rayhunter_orca_only.png" => (
+        "raycanary_orca_only.png" => (
             [(header::CONTENT_TYPE, HeaderValue::from_static("image/png"))],
-            include_bytes!("../web/build/rayhunter_orca_only.png"),
+            include_bytes!("../web/build/raycanary_orca_only.png"),
         )
             .into_response(),
-        "rayhunter_text.png" => (
+        "raycanary_text.png" => (
             [(header::CONTENT_TYPE, HeaderValue::from_static("image/png"))],
-            include_bytes!("../web/build/rayhunter_text.png"),
+            include_bytes!("../web/build/raycanary_text.png"),
         )
             .into_response(),
         "favicon.png" => (
@@ -134,7 +137,7 @@ pub async fn serve_static(
         (status = StatusCode::OK, description = "Success", body = Config)
     ),
     summary = "Get config",
-    description = "Show the running configuration for Rayhunter."
+    description = "Show the running configuration for RayCanary."
 ))]
 pub async fn get_config(
     State(state): State<Arc<ServerState>>,
@@ -158,7 +161,7 @@ pub async fn get_config(
         (status = 422, description = "Failed to deserialize JSON body")
     ),
     summary = "Set config",
-    description = "Write a new configuration for Rayhunter and trigger a restart."
+    description = "Write a new configuration for RayCanary and trigger a restart."
 ))]
 pub async fn set_config(
     State(state): State<Arc<ServerState>>,
@@ -207,7 +210,7 @@ pub async fn set_config(
         (status = StatusCode::INTERNAL_SERVER_ERROR, description = "Failed to send HTTP request. Ensure your device can reach the internet.")
     ),
     summary = "Test ntfy notification",
-    description = "Send a test notification to the ntfy_url in the running configuration for Rayhunter."
+    description = "Send a test notification to the ntfy_url in the running configuration for RayCanary."
 ))]
 pub async fn test_notification(
     State(state): State<Arc<ServerState>>,
@@ -225,7 +228,7 @@ pub async fn test_notification(
     }
 
     let http_client = reqwest::Client::new();
-    let message = "Test notification from Rayhunter".to_string();
+    let message = "Test notification from RayCanary".to_string();
 
     crate::notifications::send_notification(
         &http_client,
@@ -246,6 +249,59 @@ pub async fn test_notification(
             format!("Failed to send test notification: {e}"),
         )
     })
+}
+
+#[cfg_attr(feature = "apidocs", utoipa::path(
+    post,
+    path = "/api/test-speaker",
+    tag = "Configuration",
+    responses(
+        (status = StatusCode::OK, description = "Speaker test queued"),
+        (status = StatusCode::SERVICE_UNAVAILABLE, description = "Speaker worker is not accepting events")
+    ),
+    summary = "Test the audible-alert speaker",
+    description = "Queue a one-shot Test event for the speaker worker. The worker will run the configured \
+                   speaker.command regardless of severity filter or debounce."
+))]
+pub async fn test_speaker(
+    State(state): State<Arc<ServerState>>,
+) -> Result<(StatusCode, String), (StatusCode, String)> {
+    state
+        .speaker_sender
+        .send(SpeakerCommand::Test)
+        .await
+        .map(|_| (StatusCode::OK, "Speaker test queued".to_string()))
+        .map_err(|e| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                format!("Speaker worker is not accepting events: {e}"),
+            )
+        })
+}
+
+#[cfg_attr(feature = "apidocs", utoipa::path(
+    get,
+    path = "/api/battery",
+    tag = "Status",
+    responses(
+        (status = StatusCode::OK, description = "Current battery state", body = BatteryState),
+        (status = StatusCode::SERVICE_UNAVAILABLE, description = "Battery reporting is not supported on this device")
+    ),
+    summary = "Get current battery state",
+    description = "Read the current battery level (percentage) and charging state from the device."
+))]
+pub async fn get_battery(
+    State(state): State<Arc<ServerState>>,
+) -> Result<Json<BatteryState>, (StatusCode, String)> {
+    battery::get_battery_status(&state.config.device)
+        .await
+        .map(Json)
+        .map_err(|e| {
+            (
+                StatusCode::SERVICE_UNAVAILABLE,
+                format!("Failed to read battery state: {e}"),
+            )
+        })
 }
 
 /// Response for GET /api/time
@@ -282,7 +338,7 @@ pub struct SetTimeOffsetRequest {
 ))]
 pub async fn get_time() -> Json<TimeResponse> {
     let system_time = Local::now();
-    let adjusted_time = rayhunter::clock::get_adjusted_now();
+    let adjusted_time = raycanary::clock::get_adjusted_now();
     let offset_seconds = adjusted_time
         .signed_duration_since(system_time)
         .num_seconds();
@@ -304,10 +360,10 @@ pub async fn get_time() -> Json<TimeResponse> {
         (status = StatusCode::OK, description = "Success", body = TimeResponse)
     ),
     summary = "Set time offset",
-    description = "Set the difference (in seconds) between the system time and the adjusted time for Rayhunter."
+    description = "Set the difference (in seconds) between the system time and the adjusted time for RayCanary."
 ))]
 pub async fn set_time_offset(Json(req): Json<SetTimeOffsetRequest>) -> StatusCode {
-    rayhunter::clock::set_offset(chrono::TimeDelta::seconds(req.offset_seconds));
+    raycanary::clock::set_offset(chrono::TimeDelta::seconds(req.offset_seconds));
     StatusCode::OK
 }
 
@@ -562,6 +618,7 @@ mod tests {
     ) -> Arc<ServerState> {
         let (tx, _rx) = tokio::sync::mpsc::channel(1);
         let (analysis_tx, _analysis_rx) = tokio::sync::mpsc::channel(1);
+        let (speaker_tx, _speaker_rx) = tokio::sync::mpsc::channel(1);
 
         let analysis_status = {
             let store = store_lock.try_read().unwrap();
@@ -577,6 +634,7 @@ mod tests {
             analysis_sender: analysis_tx,
             daemon_restart_token: CancellationToken::new(),
             ui_update_sender: None,
+            speaker_sender: speaker_tx,
             wifi_status: Arc::new(RwLock::new(wifi_station::WifiStatus::default())),
             wifi_scan_lock: tokio::sync::Mutex::new(()),
             gps_state: Arc::new(RwLock::new(None)),

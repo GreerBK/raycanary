@@ -1,8 +1,8 @@
-# Using Rayhunter
+# Using RayCanary
 
-Once installed, Rayhunter will run automatically whenever your device is running. You'll see a green line on top of the device's display to indicate that it's running and recording. [The line will turn yellow dots, orange dashes, or solid red](./faq.md#red) once a potential IMSI catcher has been found, depending on the severity of the alert, until the device is rebooted or a new recording is started through the web UI.
+Once installed, RayCanary will run automatically whenever your device is running. You'll see a green line on top of the device's display to indicate that it's running and recording. [The line will turn yellow dots, orange dashes, or solid red](./faq.md#red) once a potential IMSI catcher has been found, depending on the severity of the alert, until the device is rebooted or a new recording is started through the web UI.
 
-![Rayhunter_0 5 0](./Rayhunter_0.5.0.png)
+![RayCanary_0 5 0](./RayCanary_0.5.0.png)
 
 It also serves a web UI that provides some basic controls, such as being able to start/stop recordings, download captures, delete captures, and view heuristic analyses of captures.
 
@@ -14,7 +14,7 @@ You can access this UI in one of two ways:
   network and visit <http://192.168.1.1:8080> (orbic)
   or <http://192.168.0.1:8080> (tplink).
 
-  Click past your browser warning you about the connection not being secure; Rayhunter doesn't have HTTPS yet.
+  Click past your browser warning you about the connection not being secure; RayCanary doesn't have HTTPS yet.
 
   On the **Orbic**, you can find the WiFi network password by going to the Orbic's menu > 2.4 GHz WIFI Info > Enter > find the 8-character password next to the lock 🔒 icon.
   On the **TP-Link**, you can find the WiFi network password by going to the TP-Link's menu > Advanced > Wireless > Basic Settings.
@@ -28,8 +28,8 @@ You can access this UI in one of two ways:
 
 * **Connect over USB (TP-Link):** Plug in the TP-Link and use USB tethering to establish a network connection. ADB support can be enabled on the device, but the installer won't do it for you.
 
-> **_NOTE:_** When downloading recordings, "Insecure download blocked" warnings can safely be ignored - this is due to Rayhunter not using HTTPS.
+> **_NOTE:_** When downloading recordings, "Insecure download blocked" warnings can safely be ignored - this is due to RayCanary not using HTTPS.
 
 ## Key shortcuts
 
-As of Rayhunter version 0.3.3, you can start a new recording by double-tapping the power button. Any current recording will be stopped and a new recording will be started, resetting the red line as well. This feature is disabled by default since Rayhunter version 0.4.0 and needs to be enabled through [configuration](./configuration.md).
+As of RayCanary version 0.3.3, you can start a new recording by double-tapping the power button. Any current recording will be stopped and a new recording will be started, resetting the red line as well. This feature is disabled by default since RayCanary version 0.4.0 and needs to be enabled through [configuration](./configuration.md).

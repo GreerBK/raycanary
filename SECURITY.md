@@ -2,4 +2,4 @@
 
 ## Reporting a Vulnerability
 
-Security vulnerabilities can be reported using GitHub's [private vulnerability reporting tool](https://github.com/EFForg/rayhunter/security/advisories/new).
+Security vulnerabilities can be reported using GitHub's [private vulnerability reporting tool](https://github.com/GreerBK/raycanary/security/advisories/new).

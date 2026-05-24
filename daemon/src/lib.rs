@@ -11,6 +11,7 @@ pub mod notifications;
 pub mod pcap;
 pub mod qmdl_store;
 pub mod server;
+pub mod speaker;
 pub mod stats;
 pub mod webdav;
 
@@ -22,10 +23,10 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(
     info(
-        description = "OpenAPI documentation for Rayhunter daemon\n\n**Note:** API endpoints are subject to change as needs arise, though we will try to keep them as stable as possible and notify about breaking changes in the changelogs for new versions.\n\nNo endpoints require any authentication. To use the in-browser execution on this page, you may need to disable CORS temporarily for your browser.",
+        description = "OpenAPI documentation for RayCanary daemon\n\n**Note:** API endpoints are subject to change as needs arise, though we will try to keep them as stable as possible and notify about breaking changes in the changelogs for new versions.\n\nNo endpoints require any authentication. To use the in-browser execution on this page, you may need to disable CORS temporarily for your browser.",
         license(
             name = "GNU General Public License v3.0",
-            url = "https://github.com/EFForg/rayhunter/blob/main/LICENSE"
+            url = "https://github.com/GreerBK/raycanary/blob/main/LICENSE"
         )
     ),
     paths(
@@ -45,6 +46,8 @@ use utoipa::OpenApi;
         server::get_config,
         server::set_config,
         server::test_notification,
+        server::test_speaker,
+        server::get_battery,
         server::get_time,
         server::set_time_offset,
         server::debug_set_display_state,

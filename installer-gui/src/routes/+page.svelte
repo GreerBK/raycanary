@@ -15,23 +15,23 @@
         buttonEnabled = false;
         installerOutput = '';
         try {
-            await invoke('install_rayhunter', { args: installerArgs });
+            await invoke('install_raycanary', { args: installerArgs });
         } catch (error) {
             installerOutput +=
-                'Rayhunter GUI installer encountered an internal error. Error was:\n';
+                'RayCanary GUI installer encountered an internal error. Error was:\n';
             installerOutput += error;
         }
         buttonEnabled = true;
     }
 </script>
 
-<div class="p-4 xl:px-8 bg-rayhunter-blue drop-shadow flex flex-row justify-between items-center">
+<div class="p-4 xl:px-8 bg-raycanary-blue drop-shadow flex flex-row justify-between items-center">
     <!-- https://www.w3.org/WAI/tutorials/images/decorative/ -->
-    <img src="/rayhunter_text.png" alt="" class="h-10 xl:h-12" />
+    <img src="/raycanary_text.png" alt="" class="h-10 xl:h-12" />
     <div class="flex flex-row gap-4">
         <a
             class="flex flex-row gap-1 group"
-            href="https://github.com/EFForg/rayhunter/issues"
+            href="https://github.com/GreerBK/raycanary/issues"
             target="_blank"
         >
             <span class="hidden text-white group-hover:text-gray-400 lg:flex">Report Issue</span>
@@ -53,7 +53,7 @@
         </a>
         <a
             class="flex flex-row gap-1 group"
-            href="https://efforg.github.io/rayhunter/"
+            href="https://greerbk.github.io/raycanary/"
             target="_blank"
         >
             <span class="hidden text-white group-hover:text-gray-400 lg:flex">Docs</span>

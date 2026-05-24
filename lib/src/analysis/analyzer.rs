@@ -114,7 +114,7 @@ pub struct Event {
 
 /// An [Analyzer] represents one type of heuristic for detecting an IMSI Catcher
 /// (IC). While maintaining some amount of state is useful, be mindful of how
-/// much memory your [Analyzer] uses at runtime, since rayhunter may run for
+/// much memory your [Analyzer] uses at runtime, since raycanary may run for
 /// many hours at a time with dozens of [Analyzers](Analyzer) working in parallel.
 pub trait Analyzer {
     /// Returns a user-friendly, concise name for your heuristic.
@@ -163,8 +163,8 @@ pub struct AnalyzerMetadata {
 pub struct ReportMetadata {
     /// A vector array of which analyzers were in use for the analysis
     pub analyzers: Vec<AnalyzerMetadata>,
-    /// The runtime metadata for rayhunter during the recording and analysis
-    pub rayhunter: RuntimeMetadata,
+    /// The runtime metadata for raycanary during the recording and analysis
+    pub raycanary: RuntimeMetadata,
     /// The version of the reporting format used
     // anytime the format of the report changes, bump this by 1
     //
@@ -486,11 +486,11 @@ impl Harness {
             });
         }
 
-        let rayhunter = RuntimeMetadata::new();
+        let raycanary = RuntimeMetadata::new();
 
         ReportMetadata {
             analyzers,
-            rayhunter,
+            raycanary,
             report_version: REPORT_VERSION,
         }
     }

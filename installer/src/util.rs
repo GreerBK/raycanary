@@ -38,8 +38,8 @@ pub async fn telnet_send_command_with_output(
     // after the command exits.
     //
     // 'TELNET' is quoted so that when the command gets echoed back, it does not match against
-    // RAYHUNTER_TELNET_COMMAND_DONE search string.
-    writer.write_all(format!("echo RAYHUNTER_'TELNET'_COMMAND_START; {command}; echo RAYHUNTER_'TELNET'_COMMAND_DONE\r\n").as_bytes()).await?;
+    // RAYCANARY_TELNET_COMMAND_DONE search string.
+    writer.write_all(format!("echo RAYCANARY_'TELNET'_COMMAND_START; {command}; echo RAYCANARY_'TELNET'_COMMAND_DONE\r\n").as_bytes()).await?;
 
     let mut read_buf = Vec::new();
     timeout(command_timeout, async {
@@ -51,7 +51,7 @@ pub async fn telnet_send_command_with_output(
             // may not terminate the connection appropriately on their own.
             if byte == b'\n' {
                 let response = String::from_utf8_lossy(&read_buf);
-                if response.contains("RAYHUNTER_TELNET_COMMAND_DONE") {
+                if response.contains("RAYCANARY_TELNET_COMMAND_DONE") {
                     break;
                 }
             }
@@ -60,12 +60,12 @@ pub async fn telnet_send_command_with_output(
     .await
     .with_context(|| format!("command timed out after {}s", command_timeout.as_secs()))?;
     let string = String::from_utf8_lossy(&read_buf);
-    let start = string.rfind("RAYHUNTER_TELNET_COMMAND_START");
-    let end = string.rfind("RAYHUNTER_TELNET_COMMAND_DONE");
+    let start = string.rfind("RAYCANARY_TELNET_COMMAND_START");
+    let end = string.rfind("RAYCANARY_TELNET_COMMAND_DONE");
     let string = match (start, end) {
         (Some(start), Some(end)) => {
             // skip past the START marker and the trailing \r\n of the echoed command line
-            let start = start + "RAYHUNTER_TELNET_COMMAND_START".len();
+            let start = start + "RAYCANARY_TELNET_COMMAND_START".len();
             string[start..end].trim_start_matches(['\r', '\n'])
         }
         _ => bail!("failed to parse command output from string: {string:?}"),

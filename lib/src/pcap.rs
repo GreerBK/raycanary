@@ -81,7 +81,7 @@ where
         let package = format!(
             "{} {}",
             env!("CARGO_PKG_NAME").to_owned(),
-            metadata.rayhunter_version
+            metadata.raycanary_version
         );
         let section = SectionHeaderBlock {
             endianness: Endianness::Big,

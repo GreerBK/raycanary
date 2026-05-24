@@ -1,0 +1,29 @@
+#! /bin/sh
+
+set -e
+
+case "$1" in
+start)
+    echo -n "Starting raycanary: "
+    # Below line may be replaced by the installer with device-specific startup commands, such as mounting the SD card.
+    #RAYCANARY-PRESTART
+    start-stop-daemon -S -b --make-pidfile --pidfile /tmp/raycanary.pid \
+    --startas /bin/sh -- -c "RUST_LOG=info exec /data/raycanary/raycanary-daemon /data/raycanary/config.toml > /data/raycanary/raycanary.log 2>&1"
+    echo "done"
+    ;;
+  stop)
+    echo -n "Stopping raycanary: "
+    start-stop-daemon -K -p /tmp/raycanary.pid
+    echo "done"
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage raycanary_daemon { start | stop | restart }" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

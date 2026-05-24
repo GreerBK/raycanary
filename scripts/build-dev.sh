@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build Rayhunter from source for development.
+# Build RayCanary from source for development.
 # Prerequisites: Rust (rustup) and Node.js (npm).
 #
 # Usage: ./scripts/build-dev.sh [build|frontend|check]

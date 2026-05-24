@@ -1,6 +1,6 @@
-# Rayhunter GUI Installer
+# RayCanary GUI Installer
 
-This directory contains experimental work on a Rayhunter GUI installer based on [Tauri](https://tauri.app/).
+This directory contains experimental work on a RayCanary GUI installer based on [Tauri](https://tauri.app/).
 
 ## Dependencies
 
@@ -10,7 +10,7 @@ Before building the GUI installer, you'll first need to install its dependencies
 
 You'll need to install [Tauri's dependencies](https://tauri.app/start/prerequisites/). In addition to Rust, you'll need [Node.js/npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). If you're on Linux, also be sure to install the necessary [system dependencies](https://tauri.app/start/prerequisites/#linux) from your package manager.
 
-### Rayhunter CLI Installer
+### RayCanary CLI Installer
 
 The GUI installer pulls in the CLI installer as a library. Like with the CLI installer, the firmware binary needs to be present and can be overridden with the same envvars. See `../installer/build.rs` for options.
 

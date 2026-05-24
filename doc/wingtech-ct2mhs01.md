@@ -1,6 +1,6 @@
 # Wingtech CT2MHS01
 
-Supported in Rayhunter since version 0.4.0.
+Supported in RayCanary since version 0.4.0.
 
 The Wingtech CT2MHS01 hotspot is a Qualcomm mdm9650-based device with a screen available for US$15-35. This device is often used as a base platform for white labeled versions like the T-Mobile TMOHS1. AT&T branded versions of the hotspot seem to be the most abundant.
 
@@ -30,7 +30,7 @@ Wingtechs are abundant on ebay and can also be found on Amazon:
 
 ## WiFi client mode
 
-The Wingtech supports WiFi client mode, allowing Rayhunter to connect to an existing WiFi network while keeping the hotspot running. See [WiFi Client Mode](./configuration.md#wifi-client-mode) for setup.
+The Wingtech supports WiFi client mode, allowing RayCanary to connect to an existing WiFi network while keeping the hotspot running. See [WiFi Client Mode](./configuration.md#wifi-client-mode) for setup.
 
 ## Installing
 Connect to the Wingtech's network over WiFi or USB tethering, then run the installer:
@@ -40,7 +40,7 @@ Connect to the Wingtech's network over WiFi or USB tethering, then run the insta
 ```
 
 ## Obtaining a shell
-Even when Rayhunter is running, for security reasons the Wingtech will not have telnet or adb enabled during normal operation.
+Even when RayCanary is running, for security reasons the Wingtech will not have telnet or adb enabled during normal operation.
 
 Use either command below to enable telnet or adb access:
 
@@ -56,7 +56,7 @@ adb shell
 
 ## Wi-Fi auto-shutdown
 
-By default the CT2MHS01 turns off its Wi-Fi access point after the configured sleep timer (default 10 minutes) with no connected clients. Rayhunter keeps recording on the device in the background, but once the access point is down you can't reach the web UI, download captures, or see new warnings until you power cycle the hotspot.
+By default the CT2MHS01 turns off its Wi-Fi access point after the configured sleep timer (default 10 minutes) with no connected clients. RayCanary keeps recording on the device in the background, but once the access point is down you can't reach the web UI, download captures, or see new warnings until you power cycle the hotspot.
 
 The CT2MHS01's native admin UI lets you change this:
 
@@ -67,7 +67,7 @@ The CT2MHS01's native admin UI lets you change this:
 
 ![CT2MHS01 Wi-Fi Standby setting](./ct2mhs01-wifi-standby.png)
 
-Keeping Wi-Fi always on uses more battery. If you primarily monitor Rayhunter through the device's screen and don't need remote access, leave the timer at its default.
+Keeping Wi-Fi always on uses more battery. If you primarily monitor RayCanary through the device's screen and don't need remote access, leave the timer at its default.
 
 ## Developing
 The device has a framebuffer-driven screen at /dev/fb0 that behaves
@@ -77,7 +77,7 @@ Orbic. This causes the green line on the screen to subtly flicker and
 only be displayed during some frames. Subsequent work to fully control
 the display without removing the OEM interface is desired.
 
-Rayhunter has been tested on:
+RayCanary has been tested on:
 
 ```sh
 WT_INNER_VERSION=SW_Q89323AA1_V057_M10_CRICKET_USR_MP
@@ -91,27 +91,27 @@ Please consider sharing the contents of your device's /etc/wt_version file here.
 
 ### My hotspot won't turn on after rebooting when installing over WiFi
 
-Reinsert the battery and turn the device back on, Rayhunter should be installed and running. Sometimes the Wingtech hotspot gets stuck off and ignores the power button after a reboot until the battery is reseated.
+Reinsert the battery and turn the device back on, RayCanary should be installed and running. Sometimes the Wingtech hotspot gets stuck off and ignores the power button after a reboot until the battery is reseated.
 
 You do not need to run the installer again.
 
-You'll likely see the following messages, where the installer is stuck at `Testing rayhunter ... `.
+You'll likely see the following messages, where the installer is stuck at `Testing raycanary ... `.
 
 ```sh
 Starting telnet ... ok
 Connecting via telnet to 192.168.1.1 ... ok
-Sending file /data/rayhunter/config.toml ... ok
-Sending file /data/rayhunter/rayhunter-daemon ... ok
-Sending file /etc/init.d/rayhunter_daemon ... ok
+Sending file /data/raycanary/config.toml ... ok
+Sending file /data/raycanary/raycanary-daemon ... ok
+Sending file /etc/init.d/raycanary_daemon ... ok
 Rebooting device and waiting 30 seconds for it to start up.
-Testing rayhunter ...
+Testing raycanary ...
 ```
 
 If you eventually see:
 
 ```sh
-Testing rayhunter ...
-Failed to install rayhunter on the Wingtech CT2MHS01
+Testing raycanary ...
+Failed to install raycanary on the Wingtech CT2MHS01
 
 Caused by:
     0: error sending request for url (http://192.168.1.1:8080/index.html)

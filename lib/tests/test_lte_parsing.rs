@@ -1,5 +1,5 @@
 use deku::prelude::*;
-use rayhunter::{
+use raycanary::{
     diag::{LogBody, LteRrcOtaPacket, Message, Timestamp},
     gsmtap_parser,
 };
